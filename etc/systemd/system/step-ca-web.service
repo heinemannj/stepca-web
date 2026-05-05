@@ -1,0 +1,22 @@
+[Unit]
+Description=step-ca Web Admin Service
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=30
+StartLimitBurst=3
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/stepca-web
+EnvironmentFile=/etc/stepca-web/settings.env
+ExecStart=uv run --frozen gunicorn run:app \
+  --preload \
+  --bind 0.0.0.0:5000 \
+  --workers=2 \
+  --log-level=warning \
+  --umask 007
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
