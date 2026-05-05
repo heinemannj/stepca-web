@@ -1,0 +1,42 @@
+{
+  "database": {
+    "host": "127.0.0.1",
+    "user": "step_ca",
+    "password": "",
+    "name": "step_ca",
+    "port": 5432
+  },
+  "ca": {
+    "url": "https://step-ca.example.com",
+    "fingerprint": "",
+    "admin_provisioner_name": "Admin JWK"
+  },
+  "app": {
+    "conf": "/etc/stepca-web",
+    "path": "/opt/stepca-web",
+    "url": "http://step-ca.example.com:5000"
+  },
+  "auth": {
+    "backend": "local"
+  },
+  "ldap": {
+    "url": "ldap://localhost",
+    "base_dn": "",
+    "domain": "",
+    "user_search_filter": "(uid={username})",
+    "user_search_base": "LDAP_BASE_DN",
+    "ldap_required_group_dn": "LDAP_BASE_DN"
+  },
+  "local": {
+    "users": {
+      "admin": {
+        "id": "admin",
+        "username": "admin",
+        "password_hash": "scrypt:32768:8:1$96VfiO9ZueehHIU2$b5574d7e0294efcd74ea5b50916e9b3f87324378a53feb80913e5d05343324fa7320a727c49a6f84608382abe35d04d1b3979d926d572771f2889f67ffbd438e",
+        "attributes": {
+          "role": "admin"
+        }
+      }
+    }
+  }
+}
