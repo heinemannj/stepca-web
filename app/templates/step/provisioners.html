@@ -257,10 +257,10 @@
           const arrayContainer = $('<div class="checkbox-list"></div>');
           value.forEach((item, idx) => {
             const checkboxId = `${key}_${idx}`;
-            const checkboxElement = $('<div class="custom-control custom-checkbox"></div>');
+            const checkboxElement = $('<div class="form-check custom-checkbox"></div>');
             checkboxElement.append(`
-              <input type="checkbox" class="custom-control-input" id="${checkboxId}" name="${key}" value="${item}" ${item ? 'checked' : ''}>
-              <label class="custom-control-label" for="${checkboxId}">${item}</label>
+              <input type="checkbox" class="form-check-input" id="${checkboxId}" name="${key}" value="${item}" ${item ? 'checked' : ''}>
+              <label class="form-check-label" for="${checkboxId}">${item}</label>
             `);
             arrayContainer.append(checkboxElement);
           });

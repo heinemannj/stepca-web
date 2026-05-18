@@ -102,7 +102,7 @@ class StepCAClient:
     def _save_tempfile(self, contents):
         f = tempfile.NamedTemporaryFile(mode="w", delete=False)
         f.write(contents)
-        f.close()
+        f.btn-close()
         atexit.register(self._tempfile_unlinker(f.name))
         return f.name
 

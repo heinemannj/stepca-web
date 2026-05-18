@@ -11,4 +11,4 @@ def create_jwk_keys_table():
         )
     """)
     conn.commit()
-    conn.close()
+    conn.btn-close()

@@ -18,7 +18,7 @@
 #             })
 #         except Exception as e:
 #             print("Error parsing account:", e)
-#     conn.close()
+#     conn.btn-close()
 #     return accounts
 
 # def get_acme_orders():
@@ -36,7 +36,7 @@
 #             })
 #         except Exception as e:
 #             print("Error parsing order:", e)
-#     conn.close()
+#     conn.btn-close()
 #     return orders
 
 # def get_acme_certs():
@@ -64,7 +64,7 @@
 #             })
 #         except Exception as e:
 #             print("❌ Error parsing ACME cert:", e)
-#     conn.close()
+#     conn.btn-close()
 #     return certs
 
 # def get_acme_authzs():
@@ -82,7 +82,7 @@
 #             })
 #         except Exception as e:
 #             print("Error parsing ACME authz:", e)
-#     conn.close()
+#     conn.btn-close()
 #     return authzs
 
 # def get_acme_challenges():
@@ -100,7 +100,7 @@
 #             })
 #         except Exception as e:
 #             print("Error parsing ACME challenge:", e)
-#     conn.close()
+#     conn.btn-close()
 #     return challenges
 
 
