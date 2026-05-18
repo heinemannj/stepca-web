@@ -21,7 +21,7 @@
     {% for category, message in messages %}
     <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
       {{ message }}
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <button type="button" class="close" data-bs-dismiss="alert">&times;</button>
     </div>
     {% endfor %}
     {% endif %}
@@ -30,7 +30,7 @@
   <!-- Main content -->
   <section class="app-content">
     <div class="d-flex justify-content-end mb-3">
-      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#newCertModal">
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newCertModal">
         Submit CSR
       </button>
     </div>
@@ -100,8 +100,8 @@
               </td>
               <td>{{ cert.provisioner.name or "—" }}</td>
               <td>
-                <a href="#" class="btn btn-sm btn-info" onclick="loadX509Cert('{{ data.serial_number }}')" data-toggle="modal"
-                  data-target="#x509CertModal">
+                <a href="#" class="btn btn-sm btn-info" onclick="loadX509Cert('{{ data.serial_number }}')" data-bs-toggle="modal"
+                  data-bs-target="#x509CertModal">
                   <i class="fas fa-eye"></i>
                 </a>
                 <!-- <a href="/x509/revoke/{{cert.nkey }}" class="btn btn-sm btn-danger"
@@ -109,7 +109,7 @@
                   <i class="fas fa-trash"></i>
                   </a> -->
 
-                <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#revokeModal"
+                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#revokeModal"
                   data-cert-id="{{ cert.nkey }}">
                   <i class="fas fa-trash"></i>
                 </button>
@@ -131,7 +131,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">X.509 Certificate</h5>
-            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            <button type="button" class="close" data-bs-dismiss="modal"><span>&times;</span></button>
           </div>
           <div class="modal-body text-sm" id="x509CertModalBody">
             Loading...
@@ -148,7 +148,7 @@
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title" id="revokeModalLabel">Revoke Certificate</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
@@ -175,7 +175,7 @@
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title" id="newCertModalLabel">Submit Certificate Signing Request (CSR)</h5>
-              <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+              <button type="button" class="close" data-bs-dismiss="modal"><span>&times;</span></button>
             </div>
             <div class="modal-body">
               <div class="form-group">
