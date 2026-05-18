@@ -1,0 +1,425 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} {{ title }} {% endblock %}
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="app-main">
+
+{% include 'includes/header.html' %}
+
+  <!-- Main content -->
+  <section class="app-content">
+    <div class="card">
+      <div class="card-body table-responsive p-0">
+        <table class="table table-sm table-hover text-sm table-striped">
+          <thead>
+            <tr>
+              <th>Format</th>
+              <th>Function</th>
+              <th>URI</th>
+              <th>DB Table</th>
+              <th>DB Class</th>
+              <th>CLI Command</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_acme_account_order_index</td>
+              <td>
+                <a href="{{ app_url }}/api/acme/account_orders_index" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/acme/account_orders_index</a>
+              </td>
+              <td>acme_account_orders_index</td>
+              <td>AcmeAccountOrdersIndex</td>
+              <td></td>
+              <td>???</td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_acme_accounts</td>
+              <td>
+                <a href="{{ app_url }}/api/acme/accounts" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/acme/accounts</a>
+              </td>
+              <td>acme_accounts</td>
+              <td>AcmeAccount</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_acme_authzs</td>
+              <td>
+                <a href="{{ app_url }}/api/acme/authzs" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/acme/authzs</a>
+              </td>
+              <td>acme_authzs</td>
+              <td>AcmeAuthz</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_acme_certs</td>
+              <td>
+                <a href="{{ app_url }}/api/acme/certs" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/acme/certs</a>
+              </td>
+              <td>acme_certs</td>
+              <td>AcmeCert</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_acme_challenges</td>
+              <td>
+                <a href="{{ app_url }}/api/acme/challenges" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/acme/challenges</a>
+              </td>
+              <td>acme_challenges</td>
+              <td>AcmeChallenge</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>n/a</td>
+              <td>n/a</td>
+              <td>acme_external_account_keyID_provisionerID_index</td>
+              <td>n/a</td>
+              <td></td>
+              <td>Empty table</td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>n/a</td>
+              <td>n/a</td>
+              <td>acme_external_account_keyID_reference_index</td>
+              <td>n/a</td>
+              <td></td>
+              <td>Empty table</td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>n/a</td>
+              <td>n/a</td>
+              <td>acme_external_account_keys</td>
+              <td>n/a</td>
+              <td>step ca acme eab list ???</td>
+              <td>Empty table</td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_acme_keyID_accountID_index</td>
+              <td>
+                <a href="{{ app_url }}/api/acme/keyid_accountid_index" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/acme/keyid_accountid_index</a>
+              </td>
+              <td>acme_keyID_accountID_index</td>
+              <td>AcmeKeyIdAccountIdIndex</td>
+              <td></td>
+              <td>???</td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_acme_orders</td>
+              <td>
+                <a href="{{ app_url }}/api/acme/orders" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/acme/orders</a>
+              </td>
+              <td>acme_orders</td>
+              <td>AcmeOrder</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_acme_serial_certs_index</td>
+              <td>
+                <a href="{{ app_url }}/api/acme/serial_certs_index" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/acme/serial_certs_index</a>
+              </td>
+              <td>acme_serial_certs_index</td>
+              <td>AcmeSerialCertsIndex</td>
+              <td></td>
+              <td>???</td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_admins</td>
+              <td class="table-success">
+                <a href="{{ app_url }}/api/step/admins" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/step/admins</a>
+              </td>
+              <td>admins</td>
+              <td>Admins</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>list_admins</td>
+              <td class="table-success">
+                <a href="{{ app_url }}/api/step/admins_cli" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/step/admins_cli</a>
+              </td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_authority_policies</td>
+              <td>
+                <a href="{{ app_url }}/api/step/authority_policies" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/step/authority_policies</a>
+              </td>
+              <td>authority_policies</td>
+              <td>AuthorityPolicies</td>
+              <td></td>
+              <td>Empty table</td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_generated_certs</td>
+              <td>
+                <a href="{{ app_url }}/api/x509/generated_certs" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/x509/generated_certs</a>
+              </td>
+              <td>generated_certs</td>
+              <td>GeneratedCert</td>
+              <td></td>
+              <td>???</td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_nonces</td>
+              <td>
+                <a href="{{ app_url }}/api/step/nonces" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/step/nonces</a>
+              </td>
+              <td>nonces</td>
+              <td>Nonces</td>
+              <td></td>
+              <td>???</td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_provisioners</td>
+              <td class="table-warning">
+                <a href="{{ app_url }}/api/step/provisioners" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/step/provisioners</a>
+              </td>
+              <td>provisioners</td>
+              <td>Provisioners</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>list_provisioners</td>
+              <td class="table-success">
+                <a href="{{ app_url }}/api/step/provisioners_cli" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/step/provisioners_cli</a>
+              </td>
+              <td></td>
+              <td></td>
+              <td>step ca provisioner list --ca-url=https://step-ca-55.fritz.box/crl --root=/etc/step-ca/certs/root_ca.crt</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_revoked_ssh_certs</td>
+              <td>
+                <a href="{{ app_url }}/api/ssh/revoked_certs" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/ssh/revoked_certs</a>
+              </td>
+              <td>revoked_ssh_certs</td>
+              <td>RevokedSshCerts</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>api_get_revoked_x509_with_cert_info</td>
+              <td>
+                <a href="{{ app_url }}/api/x509/revoked_certs" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/x509/revoked_certs</a>
+              </td>
+              <td>revoked_x509_certs</td>
+              <td>RevokedX509Cert</td>
+              <td></td>
+              <td>Revoked X.509 Certificates</td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_ssh_certs</td>
+              <td>
+                <a href="{{ app_url }}/api/ssh/certs" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/ssh/certs</a>
+              </td>
+              <td>ssh_certs</td>
+              <td>SshCerts</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_ssh_host_principals</td>
+              <td>
+                <a href="{{ app_url }}/api/ssh/host_principals" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/ssh/host_principals</a>
+              </td>
+              <td>ssh_host_principals</td>
+              <td>SshHostPrincipals</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_ssh_hosts</td>
+              <td>
+                <a href="{{ app_url }}/api/ssh/hosts" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/ssh/hosts</a>
+              </td>
+              <td>ssh_hosts</td>
+              <td>SshHosts</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_ssh_users</td>
+              <td>
+                <a href="{{ app_url }}/api/ssh/users" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/ssh/users</a>
+              </td>
+              <td>ssh_users</td>
+              <td>SshUsers</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_used_ott</td>
+              <td>
+                <a href="{{ app_url }}/api/step/used_ott" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/step/used_ott</a>
+              </td>
+              <td>used_ott</td>
+              <td>UsedOtt</td>
+              <td></td>
+              <td>???</td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>n/a</td>
+              <td>n/a</td>
+              <td>wire_acme_dpop_token</td>
+              <td>n/a</td>
+              <td></td>
+              <td>Empty table</td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>n/a</td>
+              <td>n/a</td>
+              <td>wire_acme_oidc_token</td>
+              <td>n/a</td>
+              <td></td>
+              <td>Empty table</td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_x509_certs</td>
+              <td>
+                <a href="{{ app_url }}/api/x509/certs" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/x509/certs</a>
+              </td>
+              <td>x509_certs</td>
+              <td>X509Cert</td>
+              <td></td>
+              <td>Issued X.509 Certificates</td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>n/a</td>
+              <td>n/a</td>
+              <td>x509_certs_data</td>
+              <td>X509CertData</td>
+              <td></td>
+              <td>Provisioner Metadata (see get_x509_certs).</td>
+            </tr>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>get_x509_crl</td>
+              <td class="table-danger">
+                <a href="{{ app_url }}/api/x509/crl" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ app_url }}/api/x509/crl</a>
+              </td>
+              <td>x509_crl</td>
+              <td>X509Crl</td>
+              <td>step crl inspect --insecure --format json https://step-ca-55.fritz.box/crl</td>
+              <td class="table-danger">Shit!!!!!</td>
+            </tr>
+            <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr>
+              <td class="table-primary">PEM</td>
+              <td>xxx</td>
+              <td>
+                <a href="{{ app_url }}/xxx.pem">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-save"></i>
+                {{ app_url }}/xxx.pem</a>
+              </td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td>xxx</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <!-- /.content -->
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

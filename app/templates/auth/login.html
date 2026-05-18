@@ -1,106 +1,109 @@
-{% block title %}{% endblock %} 
+<html lang="en">
 
-<!-- Element injected in the BODY element -->
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- Specific Page CSS goes HERE  -->
-{% block stylesheets %}
+    <link rel="icon" href="/static/assets/favicon.ico" type="image/x-icon">
+    <link rel="canonical" href="https://appseed.us/adminlte" />
 
-  <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='assets/plugins/fontawesome-free/css/all.min.css') }}">
-  <!-- icheck bootstrap -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css') }}">
-  <!-- Theme style -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/adminlte.min.css') }}">
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
 
-{% endblock stylesheets %}
+    <title>
+     step-ca Admin - {% block title %}{% endblock %}
+    </title>
 
+    <!-- Specific Page CSS goes HERE  -->
+    {% block stylesheets %}{% endblock stylesheets %}
 
-{% block content %}
-  <div class="d-flex align-items-center justify-content-center" style="min-height: 80vh;">
-    <div class="login-box">
-      <div class="login-logo">
-          <a target="_blank" rel="noopener noreferrer" 
-             href="/"><b>StepCA</b> Admin</a>
-      </div>
-      <!-- /.login-logo -->
-      <div class="card">
-        <div class="card-body login-card-body">
-              <p class="login-box-msg">
+  </head>
+
+  <body class="hold-transition {% block body_class %}{% endblock body_class %}">
+
+    {% block content %}
+    <div class="d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+      <div class="login-box">
+        <div class="login-logo">
+            <a target="_blank" rel="noopener noreferrer" 
+               href="/"><b>step-ca</b> Admin</a>
+        </div>
+        <!-- /.login-logo -->
+        <div class="card">
+          <div class="card-body login-card-body">
+            <p class="login-box-msg">
               {% if error %}
                 <span class="text-danger">{{ error }}</span>
               {% else %}
-                  Enter your credentials
+                Enter your credentials
               {% endif %}
-          </p>
-          <form method="post" action="">
-            <div class="input-group mb-3">
-              <input type="text" name="username" class="form-control" placeholder="Username" required autofocus>
-              <div class="input-group-append">
-                <div class="input-group-text">
-                  <span class="fas fa-envelope"></span>
+            </p>
+            <form method="post" action="">
+              <div class="input-group mb-3">
+                <input type="text" name="username" class="form-control" placeholder="Username" required autofocus>
+                <div class="input-group-append">
+                  <div class="input-group-text">
+                    <span class="fas fa-envelope"></span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="input-group mb-3">
-              <input type="password" name="password" class="form-control" placeholder="Password" required>
-              <div class="input-group-append">
-                <div class="input-group-text">
-                  <span class="fas fa-lock"></span>
+              <div class="input-group mb-3">
+                <input type="password" name="password" class="form-control" placeholder="Password" required>
+                <div class="input-group-append">
+                  <div class="input-group-text">
+                    <span class="fas fa-lock"></span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="col-8">
-                <div class="icheck-primary">
-
+              <div class="row">
+                <div class="col-8">
+                  <div class="icheck-primary"></div>
                 </div>
+                <div class="col-4">
+                  <button type="submit" name="login" class="btn btn-primary btn-block">Sign In</button>
+                </div>
+                <!-- /.col -->
               </div>
-
-              <div class="col-4">
-                <button type="submit" name="login" class="btn btn-primary btn-block">Sign In</button>
-              </div>
-              <!-- /.col -->
+            </form>
+            {% if has_github or has_google %}
+            <div class="social-auth-links text-center mb-3">
+              <p>- OR -</p>
+              {% if has_github %}
+              <a href="{{url_for('authentication_blueprint.login_github')}}" class="btn btn-block btn-secondary">
+                <i class="fab fa-github mr-2"></i> Sign in using Github
+              </a>
+              {% endif %}
+              {% if has_google %}
+              <a href="{{url_for('authentication_blueprint.login_google')}}" class="btn btn-block btn-info">
+                <i class="fab fa-google mr-2"></i> Sign in using Google
+              </a>
+              {% endif %}
             </div>
-          </form>
-          {% if has_github or has_google %}
-          <div class="social-auth-links text-center mb-3">
-            <p>- OR -</p>
-            {% if has_github %}
-            <a href="{{url_for('authentication_blueprint.login_github')}}" class="btn btn-block btn-secondary">
-              <i class="fab fa-github mr-2"></i> Sign in using Github
-            </a>
             {% endif %}
-            {% if has_google %}
-            <a href="{{url_for('authentication_blueprint.login_google')}}" class="btn btn-block btn-info">
-              <i class="fab fa-google mr-2"></i> Sign in using Google
-            </a>
-            {% endif %}
-          </div>
-          {% endif %}
 
-          <!-- <div class="text-center">
+            <!-- <div class="text-center">
               <br />
               <br />
               &copy;
               <a target="_blank" rel="noopener noreferrer"
-                 href="https://app-generator.dev/product/adminlte/flask/"><b>Admin</b>LTE</a> 
-              - coded by <a target="_blank" rel="noopener noreferrer" href="https://app-generator.dev">App-Generator.dev</a>.
-          </div> -->
+                href="https://app-generator.dev/product/adminlte/flask/"><b>Admin</b>LTE</a> 
+                - coded by <a target="_blank" rel="noopener noreferrer" href="https://app-generator.dev">App-Generator.dev</a>.
+            </div> -->
+
+          </div>
+          <!-- /.login-card-body -->
         </div>
-        <!-- /.login-card-body -->
       </div>
     </div>
-  </div>
-{% endblock content %}
+    {% endblock content %}
 
-<!-- Specific Page JS goes HERE  -->
-{% block javascripts %}
+    <!-- Specific Page JS goes HERE  -->
+    {% block javascripts %}{% endblock javascripts %}
 
-  <!-- jQuery -->
-  <script src="{{ url_for('static', filename='assets/plugins/jquery/jquery.min.js') }}"></script>
-  <!-- Bootstrap 4 -->
-  <script src="{{ url_for('static', filename='assets/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+  </body>
 
-{% endblock javascripts %}
+</html>

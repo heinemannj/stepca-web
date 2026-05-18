@@ -8,7 +8,6 @@ from app.blueprint.x509 import bp
 from config import CA_URL
 from app.auth.decorator import login_required
 
-
 client = StepCAClient(CA_URL)
 
 
@@ -17,23 +16,42 @@ client = StepCAClient(CA_URL)
 @login_required
 def all_certs():
     certs = get_x509_certs()
-    return render_template("x509/all_certs.html", title="X.509 All Certificates", certs=certs)
+    provisioner_map = get_active_provisioner_map(get_provisioners())
+    return render_template(
+        "x509/certs.html",
+        title="X.509 - All Certificates",
+        certs=certs,
+        provisioners=provisioner_map,
+        ca_url=CA_URL
+    )
 
 
 @bp.route("/active")
 @login_required
 def active_certs():
     certs = get_x509_active_certs()
-    provisioner_map = get_active_provisioner_map(get_step_provisioners())
-    # print("Active certs:", certs)
-    return render_template("x509/active_certs.html", title="X.509 Active Certificates", certs=certs, provisioners=provisioner_map)
+    provisioner_map = get_active_provisioner_map(get_provisioners())
+    return render_template(
+        "x509/certs.html",
+        title="X.509 - Active Certificates",
+        certs=certs,
+        provisioners=provisioner_map,
+        ca_url=CA_URL
+    )
 
 
 @bp.route("/revoked")
-
+@login_required
 def revoked_certs():
-    revoked = get_revoked_x509_with_cert_info()
-    return render_template("x509/revoked_certs.html", title="Revoked X.509 Certificates", revoked=revoked)
+    certs = get_x509_revoked_certs()
+    provisioner_map = get_active_provisioner_map(get_provisioners())
+    return render_template(
+        "x509/certs.html",
+        title="X.509 - Revoked Certificates",
+        certs=certs,
+        provisioners=provisioner_map,
+        ca_url=CA_URL
+    )
 
 
 @bp.route("/download/<serial>")
@@ -43,7 +61,6 @@ def download_cert(serial):
     if not cert:
         flash(f"Certificate {cert} not found", "danger")
         return redirect(url_for("x509/x509.active_certs"))
-
 
     # Serve the cert_pem as a downloadable file
     response = make_response(cert["certificate"])
@@ -89,7 +106,7 @@ def sign_cert():
 
 
 @bp.route("/revoke", methods=["POST"])
-
+@login_required
 def revoke_cert():
     cert_id = request.form.get("cert_id")
     passphrase = request.form.get("passphrase")
@@ -106,4 +123,4 @@ def revoke_cert():
     except Exception as e:
         flash(f"Failed to revoke certificate {cert_id} with error {e}.", "danger")
 
-    return redirect(url_for("x509.active_certs"))
+    return redirect(url_for("x509.all_certs"))

@@ -64,7 +64,7 @@ def provisioner():
             flash(f"Failed to create provisioner '{data["name"]}'.", "danger")
 
     provisioners = client.list_provisioners()
-    return render_template("step/provisioners.html", title="StepCA Provisioners", provisioners=provisioners["provisioners"])
+    return render_template("step/provisioners.html", title="step-ca - Provisioners", provisioners=provisioners["provisioners"], ca_url=CA_URL)
 
 
 @bp.route("/provisioner/<name>/delete")
@@ -94,9 +94,9 @@ def admins():
             flash(f"Failed to create admin '{subject}'.", "danger")
 
     admins = client.list_admins()
-    provisioner_map = get_active_provisioner_map(get_step_provisioners())
+    provisioner_map = get_active_provisioner_map(get_provisioners())
 
-    return render_template("step/admin.html", title="StepCA Admins", admins=admins["admins"], provisioners=provisioner_map)
+    return render_template("step/admin.html", title="step-ca - Admins", admins=admins["admins"], provisioners=provisioner_map, ca_url=CA_URL)
 
 
 @bp.route("/admin/<id>/delete")
@@ -112,17 +112,17 @@ def delete_admin(id):
 
 
 @bp.route("/service/<action>", methods=["POST"])
-def stepca_service_action(action):
+def step_ca_service_action(action):
     if action not in ["start", "stop", "restart", "status"]:
         return jsonify({"error": "Invalid action"}), 400
 
     try:
-        output = subprocess.check_output(["sudo", "/usr/local/bin/stepca_ctl.sh", action], stderr=subprocess.STDOUT)
+        output = subprocess.check_output(["sudo", "/usr/bin/systemctl", "--no-pager", "--lines=25", "-l", action, "step-ca.service"], stderr=subprocess.STDOUT)
         return jsonify({"success": True, "output": output.decode()})
     except subprocess.CalledProcessError as e:
         return jsonify({"success": False, "error": e.output.decode()}), 500
 
 
 @bp.route("/service")
-def step_service():
-    return render_template("step/service.html", title="Service Control")
+def step_ca_service():
+    return render_template("step/service.html", title="step-ca - Service Control", ca_url=CA_URL)

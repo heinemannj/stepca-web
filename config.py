@@ -72,6 +72,20 @@ finally:
     print("CA_URL :", CA_URL)
 
 try:
+    CA_ROOT = os.environ['CA_ROOT']
+except KeyError:
+    CA_ROOT = get_config("ca.root")
+finally:
+    print("CA_ROOT :", CA_ROOT)
+
+try:
+    CA_INTERMEDIATE = os.environ['CA_INTERMEDIATE']
+except KeyError:
+    CA_INTERMEDIATE = get_config("ca.intermediate")
+finally:
+    print("CA_INTERMEDIATE :", CA_INTERMEDIATE)
+
+try:
     CA_FINGERPRINT = os.environ['CA_FINGERPRINT']
 except KeyError:
     CA_FINGERPRINT = get_config("ca.fingerprint")
@@ -84,6 +98,20 @@ except KeyError:
     CA_ADMIN_PROVISIONER_NAME = get_config("ca.admin_provisioner_name")
 finally:
     print("CA_ADMIN_PROVISIONER_NAME :", CA_ADMIN_PROVISIONER_NAME)
+
+try:
+    CA_CONFIG = os.environ['CA_CONFIG']
+except KeyError:
+    CA_CONFIG = get_config("ca.config")
+finally:
+    print("CA_CONFIG :", CA_CONFIG)
+
+try:
+    APP_URL = os.environ['APP_URL']
+except KeyError:
+    APP_URL = get_config("app.url")
+finally:
+    print("APP_URL :", APP_URL)
 
 class Config:
     # Authentication backend: 'ldap' (default), 'radius', 'saml', 'oidc', 'local'

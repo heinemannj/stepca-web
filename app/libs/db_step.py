@@ -1,35 +1,28 @@
+import json
+from datetime import datetime
+import pytz
+from app.extensions import db
+from app.models.step import *
 
 import base64
-import json
 from .db_conn import get_connection
 
-
-def get_step_provisioners():
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT nkey, nvalue FROM provisioners")
-    accounts = []
-    for row in cur.fetchall():
+def get_provisioners():
+    provisioners = []
+    for row in Provisioners.query.all():
         try:
-            # Assume nkey is stored as UTF-8 text; if not, adjust accordingly.
-            key = bytes(row[0]).decode('utf-8', errors='ignore')
-            value = json.loads(bytes(row[1]))
-
+            serial = row.nkey.hex()
+            value = json.loads(row.nvalue)
+            
             details_bytes = base64.b64decode(value["details"])
-            # Step 2: parse JSON
-            details_json = json.loads(details_bytes)
+            value["details"] = json.loads(details_bytes)
 
-
-
-            accounts.append({
-                "nkey": key,
-                "data": value,
-                "details": details_json
-            })
+            
+            provisioners.append({"nkey": serial, "data": value})
         except Exception as e:
-            print("Error parsing account:", e)
-    conn.close()
-    return accounts
+            provisioners.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
+    return provisioners
+
 
 def get_active_provisioner_map(provisioners):
     """
@@ -48,28 +41,58 @@ def get_active_provisioner_map(provisioners):
     return provisioner_map
 
 
-
-
-
-
-def get_step_admins():
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT nkey, nvalue FROM admins")
+def get_admins():
     admins = []
-    for row in cur.fetchall():
-        
+    for row in Admins.query.all():
         try:
-            key = bytes(row[0]).decode("utf-8", errors="ignore")
-            value = json.loads(bytes(row[1]))
-            if value.get("deletedAt", "") == "0001-01-01T00:00:00Z":
-
-                admins.append({
-                    "nkey": key,
-                    "data": value
-                })
+            # serial = row.nkey.decode("utf-8", errors="ignore")
+            serial = row.nkey.hex()
+            value = json.loads(row.nvalue)
+            
+            admins.append({"nkey": serial, "data": value})
         except Exception as e:
-            print("Error parsing admin:", e)
-    conn.close()
+            admins.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
     return admins
+
+
+def get_authority_policies():
+    policies = []
+    for row in AuthorityPolicies.query.all():
+        try:
+            # serial = row.nkey.decode("utf-8", errors="ignore")
+            serial = row.nkey.hex()
+            value = json.loads(row.nvalue)
+            
+            policies.append({"nkey": serial, "data": value})
+        except Exception as e:
+            policies.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
+    return policies
+
+
+def get_nonces():
+    nonces = []
+    for row in Nonces.query.all():
+        try:
+            # serial = row.nkey.decode("utf-8", errors="ignore")
+            serial = row.nkey.hex()
+            value = json.loads(row.nvalue)
+            
+            nonces.append({"nkey": serial, "data": value})
+        except Exception as e:
+            nonces.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
+    return nonces
+
+
+def get_used_ott():
+    used_ott = []
+    for row in UsedOtt.query.all():
+        try:
+            # serial = row.nkey.decode("utf-8", errors="ignore")
+            serial = row.nkey.hex()
+            value = json.loads(row.nvalue)
+            
+            used_ott.append({"nkey": serial, "data": value})
+        except Exception as e:
+            used_ott.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
+    return used_ott
 

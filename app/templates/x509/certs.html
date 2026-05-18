@@ -1,0 +1,251 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} {{ title }} {% endblock %}
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="app-main">
+
+{% include 'includes/header.html' %}
+
+  <!-- Content Wrapper -->
+  <div class="app-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+  </div>
+  <!-- Main content -->
+  <section class="app-content">
+    <div class="d-flex justify-content-end mb-3">
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#newCertModal">
+        Submit CSR
+      </button>
+    </div>
+    <div class="card">
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover text-sm table-striped">
+          <thead>
+            <tr>
+              <th>Serial Number</th>
+              <th>Status</th>
+              <th>Expired</th>
+              <th>Revoked</th>
+              <th>Subject</th>
+              <th>Issuer</th>
+              <th>Valid From</th>
+              <th>Valid To</th>
+              <th>DNS Names</th>
+              <th>Provisioner</th>
+              <th style="width: 140px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cert in certs %}
+            {% set validation = cert.validation %}
+            {% set data = cert.data %}
+            <tr>
+              <td><code>{{ data.serial_number or "—" }}</code></td>
+              <td>
+                {% if validation.status %}
+                <span class="badge badge-{{
+                      'success' if  validation.status == 'valid' else
+                      'warning' if  validation.status == 'revoked' else
+                      'danger' if  validation.status == 'expired' else 'secondary'
+                    }}">{{  validation.status or "unknown" }}</span>
+                {% else %}
+                <em>—</em>
+                {% endif %}
+              </td>
+              <td>
+                {% if validation.expired %}
+                <span class="badge badge-{{
+                      'light' if  validation.expired == 'true' else ''
+                    }}">{{  validation.expired or "unknown" }}</span>
+                {% else %}
+                <em>—</em>
+                {% endif %}
+              </td>
+              <td>
+                {% if validation.revoked %}
+                <span class="badge badge-{{
+                      'light' if  validation.revoked == 'true' else ''
+                    }}">{{  validation.revoked or "unknown" }}</span>
+                {% else %}
+                <em>—</em>
+                {% endif %}
+              </td>
+              <td>{{ data.subject_dn or "—" }}</td>
+              <td>{{ data.issuer or "—" }}</td>
+              <td>{{ data.validity.start or "—" }}</td>
+              <td>{{ data.validity.end or "—" }}</td>
+              <td>
+                {% if data.dns_names %}
+                {{ data.dns_names | join(", ") }}
+                {% else %}
+                <em>—</em>
+                {% endif %}
+              </td>
+              <td>{{ cert.provisioner.name or "—" }}</td>
+              <td>
+                <a href="#" class="btn btn-sm btn-info" onclick="loadX509Cert('{{ data.serial_number }}')" data-toggle="modal"
+                  data-target="#x509CertModal">
+                  <i class="fas fa-eye"></i>
+                </a>
+                <!-- <a href="/x509/revoke/{{cert.nkey }}" class="btn btn-sm btn-danger"
+                  onclick="return confirm('Are you sure you want to revoke this certificate ?')">
+                  <i class="fas fa-trash"></i>
+                  </a> -->
+
+                <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#revokeModal"
+                  data-cert-id="{{ cert.nkey }}">
+                  <i class="fas fa-trash"></i>
+                </button>
+                {% if data.generated == True %}
+                <a href="{{ url_for('x509.download_cert', serial=data.serial) }}" class="btn btn-sm btn-success">
+                  <i class="fas fa-download"></i>
+                </a>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal fade" id="x509CertModal" tabindex="-1" role="dialog" aria-labelledby="x509CertModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">X.509 Certificate</h5>
+            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+          </div>
+          <div class="modal-body text-sm" id="x509CertModalBody">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Revoke Modal -->
+    <div class="modal fade" id="revokeModal" tabindex="-1" role="dialog" aria-labelledby="revokeModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <form method="POST" action="{{ url_for('x509.revoke_cert') }}">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="revokeModalLabel">Revoke Certificate</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <input type="hidden" name="cert_id" id="modal_cert_id">
+              <div class="form-group">
+                <label for="passphrase">Provisioner Passphrase</label>
+                <input type="password" class="form-control" id="passphrase" name="passphrase" required>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-danger">Confirm Revoke</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+
+    <div class="modal fade" id="newCertModal" tabindex="-1" role="dialog" aria-labelledby="newCertModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <form method="POST" action="{{ url_for('x509.sign_cert') }}">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="newCertModalLabel">Submit Certificate Signing Request (CSR)</h5>
+              <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label>Provisioner</label>
+                <select class="form-control" id="provisionerSelect" name="provisioner" required>
+                  {% for id, name in provisioners.items() %}
+                  <option value="{{ name }}">{{ name }}</option>
+                  {% endfor %}
+                </select>
+                <label for="passphrase">Provisioner Passphrase</label>
+                <input type="password" class="form-control" id="passphrase" name="passphrase" required>
+                <label for="csr_pem">Paste CSR (PEM format)</label>
+                <textarea class="form-control" id="csr_pem" name="csr_pem" rows="10" required></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">Submit CSR</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </section>
+  <!-- /.content -->
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+<script>
+
+  $('#revokeModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget) // Button that triggered the modal
+    var certId = button.data('cert-id') // Extract info from data-* attributes
+    var modal = $(this)
+    console.log("info" + certId)
+    modal.find('#modal_cert_id').val(certId)
+  })
+
+
+  function loadX509Cert(certId) {
+    const modalBody = document.getElementById("x509CertModalBody");
+    modalBody.innerHTML = "<em>Loading...</em>";
+
+    fetch(`/api/x509/certs/${certId}`)
+      .then(resp => resp.json())
+      .then(cert => {
+        if (cert.error) {
+          modalBody.innerHTML = `<div class="alert alert-danger">⚠️ ${cert.error} ${certId}</div>`;
+        } else {
+          jsonStr = JSON.stringify(cert, null, 4);
+          modalBody.innerHTML = `
+          <p><strong>Serial Number:</strong> <code>${cert.data.serial_number}</code></p>
+          <p><strong>Subject:</strong> ${cert.data.subject_dn}</br>
+          <strong>Issuer:</strong> ${cert.data.issuer_dn}</p>
+          <p><strong>Status:</strong> ${cert.validation.status}</br>
+          <strong>Valid From:</strong> ${cert.data.validity.start}</br>
+          <strong>Valid To:</strong> ${cert.data.validity.end}</p>
+          <pre>${jsonStr}</pre>
+        `;
+        }
+      })
+      .catch(() => {
+        modalBody.innerHTML = `<div class="alert alert-danger">⚠️ Failed to load certificate with Serial Number: ${certId}</div>`;
+      });
+  }
+
+</script>
+
+{% endblock javascripts %}

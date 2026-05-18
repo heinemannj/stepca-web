@@ -6,36 +6,16 @@
 {% block body_class %} sidebar-mini {% endblock body_class %}
 
 <!-- Specific Page CSS goes HERE  -->
-{% block stylesheets %}
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-<!-- Font Awesome -->
-<link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
-<!-- Theme style -->
-<link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
-{% endblock stylesheets %}
+{% block stylesheets %}{% endblock stylesheets %}
 
 {% block content %}
 
-<div class="content-wrapper">
+<div class="app-main">
 
-  <div class="content-header">
-    <div class="container-fluid">
-      <div class="row mb-2">
-        <div class="col-sm-6">
-          <h1 class="m-0 text-dark">{{ title }}</h1>
-        </div>
-        <div class="col-sm-6">
-          <ol class="breadcrumb float-sm-right">
-            <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item active">{{ title }}</li>
-          </ol>
-        </div>
-      </div>
-    </div>
-  </div>
+{% include 'includes/header.html' %}
 
   <!-- Flash Message -->
-  <div class="content">
+  <div class="app-content">
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
     {% for category, message in messages %}
@@ -50,7 +30,7 @@
   <!-- Flash Message -->
 
   <!-- Main content -->
-  <section class="content">
+  <section class="app-content">
     <div class="d-flex justify-content-end mb-3">
       <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createAdminModal">
         Add Admin
@@ -108,7 +88,6 @@
       </div>
     </div>
 
-
     <!-- Modal -->
     <div class="modal fade" id="createAdminModal" tabindex="-1" role="dialog" aria-labelledby="createAdminModalLabel"
       aria-hidden="true">
@@ -126,7 +105,6 @@
                 <label>Subject</label>
                 <input type="text" name="subject" class="form-control" required>
               </div>
-
               <div class="form-group">
                 <label>Provisioner</label>
                 <select name="provisioner" class="form-control" required>
@@ -135,7 +113,6 @@
                   {% endfor %}
                 </select>
               </div>
-
               <div class="form-group">
                 <label>Type</label>
                 <select name="type" class="form-control" required>
@@ -147,10 +124,8 @@
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="submit" class="btn btn-primary">Create Admin</button>
               </div>
-
             </form>
           </div>
-
         </div>
       </div>
     </div>
@@ -192,10 +167,8 @@
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="submit" class="btn btn-primary">Save Changes</button>
               </div>
-
             </form>
           </div>
-
         </div>
       </div>
     </div>
@@ -209,8 +182,6 @@
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   $('#editAdminModal').on('show.bs.modal', function (event) {
     var button = $(event.relatedTarget);
@@ -219,12 +190,11 @@
     $('#editAdminId').val(admin.id);
     $('#editAdminSubject').val(admin.subject);
     // Map provisioner_id to name using provisioners Jinja variable
-    var provisionerMap = {{ provisioners| tojson
-  }};
-  var provName = provisionerMap[admin.provisioner_id] || admin.provisioner_id;
-  $('#editAdminProvisioner').val(provName);
-  $('#editAdminType').val(admin.type);
-});
+    var provisionerMap = {{ provisioners| tojson }};
+    var provName = provisionerMap[admin.provisioner_id] || admin.provisioner_id;
+    $('#editAdminProvisioner').val(provName);
+    $('#editAdminType').val(admin.type);
+  });
 </script>
 
 {% endblock javascripts %}

@@ -138,9 +138,12 @@
 
 
 import json
-from .cert_utils import parse_cert
-from app.models.acme import AcmeAccount, AcmeOrder, AcmeCert, AcmeAuthz, AcmeChallenge
+from datetime import datetime
+import pytz
 from app.extensions import db
+from .cert_utils import parse_cert_from_bytes, parse_cert
+from .db_step import get_provisioners
+from app.models.acme import *
 
 
 def get_acme_accounts():
@@ -174,7 +177,7 @@ def get_acme_certs():
             key = row.nkey.hex()
             value = json.loads(row.nvalue)
             parsed_info = parse_cert(value["leaf"]) if "leaf" in value else {}
-            certs.append({"nkey": key, "data": {**value, **parsed_info}})
+            certs.append({"nkey": key, "data": {**value, **parsed_info}, "provisioner": {}, "validation": {}})
         except Exception as e:
             print("❌ Error parsing ACME cert:", e)
     return certs
@@ -216,3 +219,39 @@ def get_acme_cert_by_id(cert_id: str):
         except Exception as e:
             print("❌ Error parsing ACME cert:", e)
     return None
+
+
+def get_acme_account_orders_index():
+    index = []
+    for row in db.session.query(AcmeAccountOrdersIndex).all():
+        try:
+            key = row.nkey.hex()
+            value = json.loads(row.nvalue)
+            index.append({"nkey": key, "data": value})
+        except Exception as e:
+            print("Error parsing account orders index:", e)
+    return index
+
+
+def get_acme_keyID_accountID_index():
+    index = []
+    for row in db.session.query(AcmeKeyIdAccountIdIndex).all():
+        try:
+            key = row.nkey.hex()
+            value = json.loads(row.nvalue)
+            index.append({"nkey": key, "data": value})
+        except Exception as e:
+            print("Error parsing keyID-accountID index:", e)
+    return index
+
+
+def get_acme_serial_certs_index():
+    index = []
+    for row in db.session.query(AcmeSerialCertsIndex).all():
+        try:
+            key = row.nkey.hex()
+            value = json.loads(row.nvalue)
+            index.append({"nkey": key, "data": value})
+        except Exception as e:
+            print("Error parsing Serial Certs index:", e)
+    return index

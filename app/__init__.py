@@ -9,8 +9,6 @@ from sqlalchemy import inspect
 from app.models.x509 import GeneratedCert
 
 
-
-
 def create_app(config_class=Config):
     app = Flask(__name__)
 
@@ -42,15 +40,23 @@ def create_app(config_class=Config):
     from app.blueprint.x509 import api_bp as x509_api_bp
     app.register_blueprint(x509_api_bp)
 
+    from app.blueprint.ssh import bp as ssh_bp
+    app.register_blueprint(ssh_bp)
+
+    from app.blueprint.ssh import api_bp as ssh_api_bp
+    app.register_blueprint(ssh_api_bp)
+
     from app.blueprint.step import bp as step_bp
     app.register_blueprint(step_bp)
+
+    from app.blueprint.step import api_bp as step_api_bp
+    app.register_blueprint(step_api_bp)
 
     # Register authentication blueprint
     from app.blueprint.auth.routes import auth_bp
     app.register_blueprint(auth_bp)
 
     from app.blueprint.system import bp as system_bp
-
     app.register_blueprint(system_bp)
 
     # from app.blueprint.questions import bp as questions_bp

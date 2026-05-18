@@ -1,0 +1,28 @@
+<script type="text/javascript">
+	window.onload = function rewritePort() {
+		document.getElementById('ca_version').protocol="https";
+		document.getElementById('ca_version').port=443;
+		document.getElementById('ca_health').protocol="https";
+		document.getElementById('ca_health').port=443;
+		document.getElementById('ca_provisioners').protocol="https";
+		document.getElementById('ca_provisioners').port=443;
+		document.getElementById('ca_roots').protocol="https";
+		document.getElementById('ca_roots').port=443;
+		document.getElementById('ca_intermediates').protocol="https";
+		document.getElementById('ca_intermediates').port=443;
+		document.getElementById('ca_federation').protocol="https";
+		document.getElementById('ca_federation').port=443;
+		document.getElementById('ca_ssh_roots').protocol="https";
+		document.getElementById('ca_ssh_roots').port=443;
+		document.getElementById('ca_ssh_federation').protocol="https";
+		document.getElementById('ca_ssh_federation').port=443;
+		document.getElementById('ca_ssh_hosts').protocol="https";
+		document.getElementById('ca_ssh_hosts').port=443;
+		document.getElementById('ca_roots_pem').protocol="https";
+		document.getElementById('ca_roots_pem').port=443;
+		document.getElementById('ca_intermediates_pem').protocol="https";
+		document.getElementById('ca_intermediates_pem').port=443;
+		document.getElementById('ca_crl').protocol="https";
+		document.getElementById('ca_crl').port=443;
+	}
+</script>

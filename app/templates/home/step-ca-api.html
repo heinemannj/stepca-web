@@ -1,0 +1,219 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} {{ title }} {% endblock %}
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="app-main">
+
+{% include 'includes/header.html' %}
+
+  <!-- Main content -->
+  <section class="app-content">
+    <div class="col-sm-6"
+      <p>A collection of step-ca API URIs documented by Smallstep:</p>
+      <ul>
+        <li>
+          <a href="https://github.com/smallstep/certificates/blob/14f4ad7e417c0a83e4135dba9dd55ede6f3991f2/api/api.go#L327" target="_blank">
+          <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+          Smallstep step-ca API</a>
+        </li>
+        <li>
+          <a href="https://github.com/smallstep/clients/blob/main/postman/step-ca.postman_collection.json" target="_blank">
+          <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+          Smallstep step-ca.postman_collection.json</a>
+        </li>
+        <li>
+          <a href="https://github.com/smallstep/certificates/discussions/765" target="_blank">
+          <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+          Smallstep tutorials, examples, integrations and workflows</a>
+        </li>
+        <li>
+          <a href="https://smallstep.com/blog/" target="_blank">
+          <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+          Smallstep blog posts</a>
+        </li>
+        <li>
+          <a href="https://smallstep.com/docs/design-document/" target="_blank">
+          <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+          The Design & Architecture of Smallstep</a>
+        </li>
+        <li>
+          <a href="https://smallstep.com/blog/everything-pki/" target="_blank">
+          <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+          Everything you should know about certificates and PKI but are too afraid to ask</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-body table-responsive p-0">
+        <table class="table table-sm table-hover text-sm table-striped">
+          <thead>
+            <tr>
+              <th>Format</th>
+              <th>Function</th>
+              <th>URI</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="table-secondary">JSON</td>
+              <td>Version</td>
+              <td>
+                <a href="{{ ca_url }}/version" id="ca_version" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ ca_url }}/version</a>
+              </td>
+              <td>
+                Current <a href="https://github.com/smallstep/certificates/releases" target="_blank">Version</a> of the targeted <a href="https://smallstep.com/docs/step-ca/" target="_blank">Step Certificate Authority</a>.
+              </td>
+            </tr>
+            <tr>
+              <td class="table-secondary"></td>
+              <td>Health</td>
+              <td>
+                <a href="{{ ca_url }}/health" id="ca_health" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ ca_url }}/health</a>
+              </td>
+              <td>
+                Current Health/Status of the targeted <a href="https://smallstep.com/docs/step-ca/" target="_blank">Step Certificate Authority</a>.
+              </td>
+            </tr>
+            <tr>
+              <td class="table-secondary"></td>
+              <td>Provisioners Configuration</td>
+              <td>
+                <a href="{{ ca_url }}/provisioners" id="ca_provisioners" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ ca_url }}/provisioners</a>
+              </td>
+              <td>
+                <a href="https://smallstep.com/docs/step-ca/provisioners/" target="_blank">Provisioners Configuration</a> of the targeted <a href="https://smallstep.com/docs/step-ca/" target="_blank">Step Certificate Authority</a>.
+              </td>
+            </tr>
+            <tr>
+              <td class="table-secondary"></td>
+              <td>Root Certificate</td>
+              <td>
+                <a href="{{ ca_url }}/roots" id="ca_roots" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ ca_url }}/roots</a>
+              </td>
+              <td>
+                Root Certificate of the targeted <a href="https://smallstep.com/docs/step-ca/" target="_blank">Step Certificate Authority</a>.
+              </td>
+            </tr>
+            <tr>
+              <td class="table-secondary"></td>
+              <td>Intermediate Certificate</td>
+              <td>
+                <a href="{{ ca_url }}/intermediates" id="ca_intermediates" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ ca_url }}/intermediates</a>
+              </td>
+              <td>
+                Intermediate Certificate (bundled with all certificates needed for <a href="https://smallstep.com/docs/step-cli/reference/certificate/verify/" target="_blank">certificate path validation</a>) signed by the Root Certificate of the targeted <a href="https://smallstep.com/docs/step-ca/" target="_blank">Step Certificate Authority</a>.
+              </td>
+            </tr>
+            <tr>
+              <td class="table-secondary"></td>
+              <td>Federation Certificates</td>
+              <td>
+                <a href="{{ ca_url }}/federation" id="ca_federation" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ ca_url }}/federation</a>
+              </td>
+              <td>
+                <a href="https://smallstep.com/blog/step-v0.8.3-federation-root-rotation/" target="_blank">Federated Root Certificates</a> of the targeted <a href="https://smallstep.com/docs/step-ca/" target="_blank">Step Certificate Authority</a>.
+              </td>
+            </tr>
+            <tr>
+              <td class="table-secondary"></td>
+              <td></td>
+              <td>
+                <a href="{{ ca_url }}/ssh/roots" id="ca_ssh_roots" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ ca_url }}/ssh/roots</a>
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="table-secondary"></td>
+              <td></td>
+              <td>
+                <a href="{{ ca_url }}/ssh/federation" id="ca_ssh_federation" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ ca_url }}/ssh/federation</a>
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="table-secondary"></td>
+              <td></td>
+              <td>
+                <a href="{{ ca_url }}/ssh/hosts" id="ca_ssh_hosts" target="_blank">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-external-link-alt"></i>
+                {{ ca_url }}/ssh/hosts</a>
+              </td>
+              <td></td>
+            </tr>
+            <tr><td></td><td></td><td></td><td></td></tr>
+            <tr>
+              <td class="table-primary">PEM</td>
+              <td>Root Certificate</td>
+              <td>
+                <a href="{{ ca_url }}/roots.pem" id="ca_roots_pem">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-save"></i>
+                {{ ca_url }}/roots.pem</a>
+              </td>
+              <td>
+                Root Certificate of the targeted <a href="https://smallstep.com/docs/step-ca/" target="_blank">Step Certificate Authority</a>.
+              </td>
+            </tr>
+            <tr>
+              <td class="table-primary"></td>
+              <td>Intermediate Certificate</td>
+              <td>
+                <a href="{{ ca_url }}/intermediates.pem" id="ca_intermediates_pem">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-save"></i>
+                {{ ca_url }}/intermediates.pem</a>
+              </td>
+              <td>
+                Intermediate Certificate (bundled with all certificates needed for <a href="https://smallstep.com/docs/step-cli/reference/certificate/verify/" target="_blank">certificate path validation</a>) signed by the Root Certificate of the targeted <a href="https://smallstep.com/docs/step-ca/" target="_blank">Step Certificate Authority</a>.
+              </td>
+            </tr>
+            <tr><td></td><td></td><td></td><td></td></tr>
+            <tr>
+              <td class="table-info">CRL/PEM</td>
+              <td>Certificate Revokation List</td>
+              <td>
+                <a href="{{ ca_url }}/crl" id="ca_crl">
+                <i style="margin-right: 0.25em;" class="nav-icon fas fa-save"></i>
+                {{ ca_url }}/crl</a>
+              </td>
+              <td>
+                <a href="https://smallstep.com/docs/step-ca/certificate-authority-server-production/#enable-crl-for-an-intermediate-ca" target="_blank">Certificate Revokation List</a> (containing all revoked certificates) of the targeted <a href="https://smallstep.com/docs/step-ca/" target="_blank">Step Certificate Authority</a>.</br>
+                <a href="https://smallstep.com/docs/step-ca/certificate-authority-server-production/#consider-active-revocation" target="_blank">Active Revocation</a> for both: For your Intermediate CA as well as for all your leaf certificates.</td>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <!-- /.content -->
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

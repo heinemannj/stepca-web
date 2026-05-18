@@ -8,8 +8,11 @@
   },
   "ca": {
     "url": "https://step-ca.example.com",
+    "root": "/etc/step-ca/certs/root_ca.crt",
+    "intermediate": "/etc/step-ca/certs/intermediate_ca.crt",
     "fingerprint": "",
-    "admin_provisioner_name": "Admin JWK"
+    "admin_provisioner_name": "Admin JWK",
+    "ca-config": "/etc/step-ca/config/ca.json"
   },
   "app": {
     "conf": "/etc/stepca-web",

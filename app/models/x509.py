@@ -15,6 +15,11 @@ class RevokedX509Cert(db.Model):
     nkey = db.Column(db.LargeBinary, primary_key=True)
     nvalue = db.Column(db.LargeBinary)
 
+class X509Crl(db.Model):
+    __tablename__ = 'x509_crl'
+    nkey = db.Column(db.LargeBinary, primary_key=True)
+    nvalue = db.Column(db.LargeBinary)
+
 class GeneratedCert(db.Model):
     __tablename__ = 'generated_certs'
     id = db.Column(db.Integer, primary_key=True)

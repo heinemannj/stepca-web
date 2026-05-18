@@ -29,8 +29,10 @@
   </div>
   <!-- Flash Message -->
 
+
   <!-- Main content -->
   <section class="app-content">
+
     <div class="card">
       <div class="card-body table-responsive p-0">
         <div class="btn-group ml-4 mt-4 mb-4">
@@ -41,11 +43,16 @@
           <button class="btn btn-secondary" onclick="controlService('status')"><i class="fas fa-info-circle"></i>
             Status</button>
         </div>
+
         <pre id="serviceOutput" class="bg-light p-3 text-sm"></pre>
+
       </div>
     </div>
+
+
   </section>
   <!-- /.content -->
+
 </div>
 
 {% endblock content %}
@@ -56,7 +63,7 @@
 <script>
   function controlService(action) {
     document.getElementById("serviceOutput").textContent = "Running...";
-    fetch(`/step/service/${action}`, { method: "POST" })
+    fetch(`/system/service/${action}`, { method: "POST" })
       .then(resp => resp.json())
       .then(data => {
         if (data.success) {

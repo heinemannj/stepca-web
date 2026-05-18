@@ -1,43 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="/static/assets/favicon.ico" type="image/x-icon">
-  <link rel="canonical" href="https://appseed.us/adminlte" />
-  <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
-  <title>
-    StepCA Admin - {% block title %}{% endblock %}
-  </title>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  {% block stylesheets %}{% endblock stylesheets %}
+    <link rel="icon" href="/static/assets/favicon.ico" type="image/x-icon">
+    <link rel="canonical" href="https://appseed.us/adminlte" />
 
-</head>
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome (latest) -->
+    <link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css"
+      integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c="
+      crossorigin="anonymous">
+    <!-- Theme style: AdminLTE 4 (Bootstrap 5 Admin Dashboard) -->
+    <link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-rc7/dist/css/adminlte.min.css"
+      integrity="sha256-XVPNiF6OsEQIRMDMoDI5INGNwIMxFMFDbYQDZfG1RwM="
+      crossorigin="anonymous">
 
-<body class="hold-transition {% block body_class %}{% endblock body_class %}">
-  <div class="wrapper">
+    <title>
+      step-ca Admin - {% block title %}{% endblock %}
+    </title>
+    {% block stylesheets %}{% endblock stylesheets %}
+  </head>
 
-    {% include 'includes/navigation.html' %}
+  <body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary {% block body_class %}{% endblock body_class %}">
+    <div class="app-wrapper">
 
-    {% include 'includes/sidebar.html' %}
+      {% include 'includes/navigation.html' %}
+      {% include 'includes/sidebar.html' %}
+      {% block content %}{% endblock content %}
+      {% include 'includes/footer.html' %}
 
-    {% block content %}{% endblock content %}
+      <!-- Control Sidebar -->
+      <aside class="control-sidebar control-sidebar-dark">
+        <!-- Control sidebar content goes here -->
+      </aside>
+      <!-- Control Sidebar -->
 
-    {% include 'includes/footer.html' %}
+    </div>
+    <!-- app-wrapper -->
 
-    <!-- Control Sidebar -->
-    <aside class="control-sidebar control-sidebar-dark">
-      <!-- Control sidebar content goes here -->
-    </aside>
-    <!-- /.control-sidebar -->
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- AdminLTE 4 (Bootstrap 5 Admin Dashboard) -->
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-rc7/dist/js/adminlte.min.js"
+      integrity="sha256-fQLRmwAkBzo9vMF8fPUXleTOx6HTKEPWzk4evkKEOGU="
+      crossorigin="anonymous">
+    </script>
+    <!-- Bootstrap 5 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js"
+      integrity="sha256-ew8UiV1pJH/YjpOEBInP1HxVvT/SfrCmwSoUzF9JIgc="
+      crossorigin="anonymous">
+    </script>
 
-  </div>
-  <!-- ./wrapper -->
+    <!-- Specific Page JS goes HERE  -->
+    {% block javascripts %}{% endblock javascripts %}
 
-  <!-- Specific Page JS goes HERE  -->
-  {% block javascripts %}{% endblock javascripts %}
-
-</body>
-
+  </body>
 </html>

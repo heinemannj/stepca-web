@@ -6,12 +6,12 @@ import base64
 import re
 
 
-def format_pretty_date(dt):
-    return dt.strftime("%B %d, %Y")
-
-
 def parse_cert(leaf_b64):
     try:
+
+        def get_attr(name, oid):
+            return next((v.value for v in name.get_attributes_for_oid(oid)), None)
+
         pem_bytes = base64.b64decode(leaf_b64)
         pem_str = pem_bytes.decode("utf-8", errors="ignore")
 
@@ -29,11 +29,7 @@ def parse_cert(leaf_b64):
         except x509.ExtensionNotFound:
             san = []
 
-        # Extract Subject components
-        subject = cert.subject
-        get_attr = lambda oid: next((v.value for v in subject.get_attributes_for_oid(oid)), None)
-
-        # Key Size
+        # Public key info
         pubkey = cert.public_key()
         if isinstance(pubkey, rsa.RSAPublicKey):
             key_size = pubkey.key_size
@@ -43,18 +39,23 @@ def parse_cert(leaf_b64):
             key_size = "Unknown"
 
         return {
-            "subject": subject.rfc4514_string(),
-            "issuer": cert.issuer.rfc4514_string(),
-            "not_before": cert.not_valid_before_utc.isoformat(),
-            "not_after": cert.not_valid_after_utc.isoformat(),
-            "not_before_pretty": format_pretty_date(cert.not_valid_before_utc),
-            "not_after_pretty": format_pretty_date(cert.not_valid_after_utc),
-            "serial": format(cert.serial_number, "x"),
-            "organization": get_attr(NameOID.ORGANIZATION_NAME),
-            "organizational_unit": get_attr(NameOID.ORGANIZATIONAL_UNIT_NAME),
-            "locality": get_attr(NameOID.LOCALITY_NAME),
-            "state": get_attr(NameOID.STATE_OR_PROVINCE_NAME),
-            "country": get_attr(NameOID.COUNTRY_NAME),
+            "subject_dn": cert.subject.rfc4514_string(),
+            "subject": {
+                "common_name": get_attr(cert.subject, NameOID.COMMON_NAME),
+                "organization": get_attr(cert.subject, NameOID.ORGANIZATION_NAME),
+                "organizational_unit": get_attr(cert.subject, NameOID.ORGANIZATIONAL_UNIT_NAME),
+                "locality": get_attr(cert.subject, NameOID.LOCALITY_NAME),
+                "state": get_attr(cert.subject, NameOID.STATE_OR_PROVINCE_NAME),
+                "country": get_attr(cert.subject, NameOID.COUNTRY_NAME)
+            },
+            "issuer_dn": cert.issuer.rfc4514_string(),
+            "validity": {
+                "start": cert.not_valid_before_utc.isoformat(),
+                "end": cert.not_valid_after_utc.isoformat(),
+                "length": str(cert.not_valid_after_utc - cert.not_valid_before_utc)
+            },
+            #"serial": format(cert.serial_number, "x"),
+            "serial_number": str(cert.serial_number),
             "key_size": key_size,
             "dns_names": san,
         }
@@ -68,9 +69,6 @@ def parse_cert_from_bytes(cert_bytes: bytes):
 
         def get_attr(name, oid):
             return next((v.value for v in name.get_attributes_for_oid(oid)), None)
-
-        def format_date(dt):
-            return dt.strftime("%B %d, %Y")
 
         try:
             cert = x509.load_pem_x509_certificate(cert_bytes, default_backend())
@@ -94,18 +92,23 @@ def parse_cert_from_bytes(cert_bytes: bytes):
             key_size = "Unknown"
 
         return {
-            "subject": cert.subject.rfc4514_string(),
-            "issuer": cert.issuer.rfc4514_string(),
-            "organization": get_attr(cert.subject, NameOID.ORGANIZATION_NAME),
-            "organizational_unit": get_attr(cert.subject, NameOID.ORGANIZATIONAL_UNIT_NAME),
-            "locality": get_attr(cert.subject, NameOID.LOCALITY_NAME),
-            "state": get_attr(cert.subject, NameOID.STATE_OR_PROVINCE_NAME),
-            "country": get_attr(cert.subject, NameOID.COUNTRY_NAME),
-            "not_before": cert.not_valid_before_utc.isoformat(),
-            "not_after": cert.not_valid_after_utc.isoformat(),
-            "not_before_pretty": format_date(cert.not_valid_before_utc),
-            "not_after_pretty": format_date(cert.not_valid_after_utc),
-            "serial": format(cert.serial_number, "x"),
+            "subject_dn": cert.subject.rfc4514_string(),
+            "subject": {
+                "common_name": get_attr(cert.subject, NameOID.COMMON_NAME),
+                "organization": get_attr(cert.subject, NameOID.ORGANIZATION_NAME),
+                "organizational_unit": get_attr(cert.subject, NameOID.ORGANIZATIONAL_UNIT_NAME),
+                "locality": get_attr(cert.subject, NameOID.LOCALITY_NAME),
+                "state": get_attr(cert.subject, NameOID.STATE_OR_PROVINCE_NAME),
+                "country": get_attr(cert.subject, NameOID.COUNTRY_NAME)
+            },
+            "issuer_dn": cert.issuer.rfc4514_string(),
+            "validity": {
+                "start": cert.not_valid_before_utc.isoformat(),
+                "end": cert.not_valid_after_utc.isoformat(),
+                "length": str(cert.not_valid_after_utc - cert.not_valid_before_utc)
+            },
+            #"serial": format(cert.serial_number, "x"),
+            "serial_number": str(cert.serial_number),
             "key_size": key_size,
             "dns_names": san,
         }

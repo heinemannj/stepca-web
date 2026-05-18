@@ -24,3 +24,18 @@ class AcmeChallenge(db.Model):
     __tablename__ = 'acme_challenges'
     nkey = db.Column(db.LargeBinary, primary_key=True)
     nvalue = db.Column(db.LargeBinary)
+
+class AcmeAccountOrdersIndex(db.Model):
+    __tablename__ = 'acme_account_orders_index'
+    nkey = db.Column(db.LargeBinary, primary_key=True)
+    nvalue = db.Column(db.LargeBinary)
+
+class AcmeKeyIdAccountIdIndex(db.Model):
+    __tablename__ = 'acme_keyID_accountID_index'
+    nkey = db.Column(db.LargeBinary, primary_key=True)
+    nvalue = db.Column(db.LargeBinary)
+
+class AcmeSerialCertsIndex(db.Model):
+    __tablename__ = 'acme_serial_certs_index'
+    nkey = db.Column(db.LargeBinary, primary_key=True)
+    nvalue = db.Column(db.LargeBinary)
