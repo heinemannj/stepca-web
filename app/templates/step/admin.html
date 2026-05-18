@@ -101,11 +101,11 @@
           </div>
           <div class="modal-body">
             <form method="POST" action="{{ url_for('step.admins') }}">
-              <div class="form-group">
+              <div class="mb-3">
                 <label>Subject</label>
                 <input type="text" name="subject" class="form-control" required>
               </div>
-              <div class="form-group">
+              <div class="mb-3">
                 <label>Provisioner</label>
                 <select name="provisioner" class="form-control" required>
                   {% for id, name in provisioners.items() %}
@@ -113,7 +113,7 @@
                   {% endfor %}
                 </select>
               </div>
-              <div class="form-group">
+              <div class="mb-3">
                 <label>Type</label>
                 <select name="type" class="form-control" required>
                   <option value=1>ADMIN</option>
@@ -144,11 +144,11 @@
           <div class="modal-body">
             <form id="editAdminForm" method="POST" action="{{ url_for('step.admins') }}">
               <input type="hidden" name="admin_id" id="editAdminId">
-              <div class="form-group">
+              <div class="mb-3">
                 <label>Subject</label>
                 <input type="text" name="subject" id="editAdminSubject" class="form-control" required>
               </div>
-              <div class="form-group">
+              <div class="mb-3">
                 <label>Provisioner</label>
                 <select name="provisioner" id="editAdminProvisioner" class="form-control" required>
                   {% for id, name in provisioners.items() %}
@@ -156,7 +156,7 @@
                   {% endfor %}
                 </select>
               </div>
-              <div class="form-group">
+              <div class="mb-3">
                 <label>Type</label>
                 <select name="type" id="editAdminType" class="form-control" required>
                   <option value=1>ADMIN</option>

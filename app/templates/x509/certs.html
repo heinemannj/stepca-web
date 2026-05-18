@@ -154,7 +154,7 @@
             </div>
             <div class="modal-body">
               <input type="hidden" name="cert_id" id="modal_cert_id">
-              <div class="form-group">
+              <div class="mb-3">
                 <label for="passphrase">Provisioner Passphrase</label>
                 <input type="password" class="form-control" id="passphrase" name="passphrase" required>
               </div>
@@ -178,7 +178,7 @@
               <button type="button" class="close" data-bs-dismiss="modal"><span>&times;</span></button>
             </div>
             <div class="modal-body">
-              <div class="form-group">
+              <div class="mb-3">
                 <label>Provisioner</label>
                 <select class="form-control" id="provisionerSelect" name="provisioner" required>
                   {% for id, name in provisioners.items() %}
