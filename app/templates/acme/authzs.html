@@ -12,61 +12,135 @@
 
 <div class="app-main">
 
-{% include 'includes/header.html' %}
+  {% include 'includes/header.html' %}
+  {% include 'includes/flash_message.html' %}
 
   <!-- Main content -->
   <section class="app-content">
     <div class="card">
       <div class="card-body table-responsive p-0">
-        <table class="table table-hover text-sm table-striped">
+        <table class="table table-hover table-sm table-striped" style="font-size:10pt" id="app-table">
           <thead>
             <tr>
               <th>Authorization ID</th>
               <th>Identifier</th>
               <th>Status</th>
               <th>Wildcard</th>
+              <th>Created</th>
               <th>Expires</th>
+              <th>Account</th>
               <th>Challenges</th>
+              <th style="width: 120px;">Actions</th>
             </tr>
           </thead>
           <tbody>
             {% for authz in authzs %}
-            {% set data = authz.data %}
-            <tr>
-              <td><code>{{ authz.nkey }}</code></td>
-              <td>
-                {% if data.identifier %}
-                {{ data.identifier.type }}: {{ data.identifier.value }}
-                {% else %}
-                <em>—</em>
-                {% endif %}
-              </td>
-              <td>
-                {% if data.status %}
-                <span class="badge badge-{{
-                      'success' if data.status == 'valid' else
-                      'warning' if data.status == 'pending' else
-                      'danger' if data.status == 'invalid' else 'secondary'
-                    }}">{{ data.status }}</span>
-                {% else %}
-                <em>—</em>
-                {% endif %}
-              </td>
-              <td>{{ data.wildcard | default(false) }}</td>
-              <td>{{ data.expiresAt or '—' }}</td>
-              <td>
-                {% if data.challengeIDs %}
-                {{ data.challengeIDs | length }} challenges
-                {% else %}
-                <em>—</em>
-                {% endif %}
-              </td>
-            </tr>
+              {% set data = authz.data %}
+              <tr>
+                <td><code>{{ authz.nkey }}</code></td>
+                <td>
+                  {% if data.identifier %}
+                  {{ data.identifier.type }}: {{ data.identifier.value }}
+                  {% else %}
+                  <em>—</em>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if data.status %}
+                  <span class="badge text-bg-{{
+                        'success' if data.status == 'valid' else
+                        'warning' if data.status == 'pending' else
+                        'danger' if data.status == 'invalid' else 'secondary'
+                      }}">{{ data.status }}</span>
+                  {% else %}
+                  <em>—</em>
+                  {% endif %}
+                </td>
+                <td>{{ data.wildcard | default(false) }}</td>
+                <td>{{ data.createdAt or '—' }}</td>
+                <td>{{ data.expiresAt or '—' }}</td>
+                <td>
+                  {% if authz.account.provisionerName %}
+                    <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#accountViewModal"
+                      data-bs-accountID='{{ authz.data.accountID | tojson | safe }}'
+                      style="--bs-btn-padding-y: 0; --bs-btn-padding-x: 0; font-size:10pt;">
+                      {{ authz.account.provisionerName }}
+                    </button>
+                  {% else %}
+                    <em>—</em>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if data.challengeIDs %}
+                    {% for i in data.challengeIDs %}
+                      <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#challengeViewModal"
+                        data-bs-challengeIDs='{{ i | tojson | safe }}'
+                        style="--bs-btn-padding-y: 0; --bs-btn-padding-x: 0; font-size:10pt;">
+                        <code>{{ i }}</code>
+                      </button></br>
+                    {% endfor %}
+                  {% else %}
+                    <em>—</em>
+                  {% endif %}
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#authzViewModal"
+                    data-bs-authz='{{ authz | tojson | safe }}'>
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </td>
+              </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
+
+    <!-- ACME Authorization View Modal -->
+    <div class="modal fade" id="authzViewModal" tabindex="-1" role="dialog" aria-labelledby="authzViewModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">View - ACME Authorization</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-sm" id="authzViewModalBody">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACME Challenge View Modal -->
+    <div class="modal fade" id="challengeViewModal" tabindex="-1" role="dialog" aria-labelledby="challengeViewModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">View - ACME Challenge</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-sm" id="challengeViewModalBody">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACME Account View Modal -->
+    <div class="modal fade" id="accountViewModal" tabindex="-1" role="dialog" aria-labelledby="accountViewModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">View - ACME Account</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-sm" id="accountViewModalBody">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+
   </section>
   <!-- /.content -->
 
@@ -75,4 +149,88 @@
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+
+<script>
+
+  // Function for authzViewModal
+  const authzViewModal = document.querySelector('#authzViewModal');
+  authzViewModal.addEventListener('show.bs.modal', function (event) {
+    // Get the reference of the triggering button 
+    // and retrieve the value from the attribute
+    const modalButton = event.relatedTarget;
+    const authz = JSON.parse(modalButton.getAttribute('data-bs-authz'));
+    const jsonStr = JSON.stringify(authz, null, 4);
+
+    const modalBody = document.getElementById("authzViewModalBody");
+
+    modalBody.innerHTML = `
+      <p><strong>Authorization ID:</strong> <code>${authz.nkey}</code></p>
+
+      <pre>${jsonStr}</pre>
+    `;
+  });
+
+
+  // Function for accountViewModal
+  const accountViewModal = document.querySelector('#accountViewModal');
+  accountViewModal.addEventListener('show.bs.modal', function (event) {
+    // Get the reference of the triggering button 
+    // and retrieve the value from the attribute
+    const modalButton = event.relatedTarget;
+    const ID = JSON.parse(modalButton.getAttribute('data-bs-accountID'));
+
+    const modalBody = document.getElementById("accountViewModalBody");
+
+    fetch(`/api/acme/accounts/${ID}`)
+      .then(resp => resp.json())
+      .then(account => {
+        if (account.error) {
+          modalBody.innerHTML = `<div class="alert alert-danger">⚠️ ${account.error}</div>`;
+        } else {
+          const jsonStr = JSON.stringify(account, null, 4);
+          modalBody.innerHTML = `
+            <p><strong>Account ID:</strong> <code>${account.data.id}</code></p>
+
+            <pre>${jsonStr}</pre>
+          `;
+        }
+      })
+      .catch(() => {
+        modalBody.innerHTML = `<div class="alert alert-danger">⚠️ Failed to load account.</div>`;
+      });
+  });
+
+
+  // Function for challengeViewModal
+  const challengeViewModal = document.querySelector('#challengeViewModal');
+  challengeViewModal.addEventListener('show.bs.modal', function (event) {
+    // Get the reference of the triggering button 
+    // and retrieve the value from the attribute
+    const modalButton = event.relatedTarget;
+    const ID = JSON.parse(modalButton.getAttribute('data-bs-challengeIDs'));
+
+    const modalBody = document.getElementById("challengeViewModalBody");
+
+    fetch(`/api/acme/challenges/${ID}`)
+      .then(resp => resp.json())
+      .then(challenge => {
+        if (challenge.error) {
+          modalBody.innerHTML = `<div class="alert alert-danger">⚠️ ${challenge.error}</div>`;
+        } else {
+          const jsonStr = JSON.stringify(challenge, null, 4);
+          modalBody.innerHTML = `
+            <p><strong>Challenge ID:</strong> <code>${challenge.data.id}</code></p>
+
+            <pre>${jsonStr}</pre>
+          `;
+        }
+      })
+      .catch(() => {
+        modalBody.innerHTML = `<div class="alert alert-danger">⚠️ Failed to load challenge.</div>`;
+      });
+  });
+
+</script>
+
+{% endblock javascripts %}

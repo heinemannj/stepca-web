@@ -13,7 +13,7 @@ client = StepCAClient(CA_URL)
 @api_bp.route("/certs/<id>")
 @login_required
 def api_get_x509_certs_by_id(id):
-    item = get_x509_certs_by_serial(id)
+    item = get_x509_certs_by_id(id)
 
     if item:
         return jsonify(item)
@@ -23,7 +23,7 @@ def api_get_x509_certs_by_id(id):
 @api_bp.route("/certs")
 @login_required
 def api_get_x509_certs():
-    item = get_x509_certs()
+    item, counter = get_x509_certs()
 
     if item:
         return jsonify(item)

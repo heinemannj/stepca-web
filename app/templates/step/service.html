@@ -12,22 +12,8 @@
 
 <div class="app-main">
 
-{% include 'includes/header.html' %}
-
-  <!-- Flash Message -->
-  <div class="app-content">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-      {{ message }}
-      <button type="button" class="close" data-bs-dismiss="alert">&times;</button>
-    </div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
-  </div>
-  <!-- Flash Message -->
+  {% include 'includes/header.html' %}
+  {% include 'includes/flash_message.html' %}
 
   <!-- Main content -->
   <section class="app-content">
@@ -54,6 +40,7 @@
 {% block javascripts %}
 
 <script>
+
   function controlService(action) {
     document.getElementById("serviceOutput").textContent = "Running...";
     fetch(`/step/service/${action}`, { method: "POST" })
@@ -67,4 +54,5 @@
       });
   }
 </script>
+
 {% endblock javascripts %}

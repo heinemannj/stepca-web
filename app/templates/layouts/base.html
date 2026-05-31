@@ -2,28 +2,51 @@
 <html lang="en">
 
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <link rel="icon" href="/static/assets/favicon.ico" type="image/x-icon">
-    <link rel="canonical" href="https://appseed.us/adminlte" />
-
-    <!-- Google Font: Source Sans Pro -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-    <!-- Font Awesome (latest) -->
-    <link rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css"
-      integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c="
-      crossorigin="anonymous">
-    <!-- Theme style: AdminLTE 4 (Bootstrap 5 Admin Dashboard) -->
-    <link rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-rc7/dist/css/adminlte.min.css"
-      integrity="sha256-XVPNiF6OsEQIRMDMoDI5INGNwIMxFMFDbYQDZfG1RwM="
-      crossorigin="anonymous">
-
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>
       step-ca Admin - {% block title %}{% endblock %}
     </title>
+
+    <!--begin::Accessibility Meta Tags-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#007bff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
+    <!--end::Accessibility Meta Tags-->
+
+    <link rel="icon" href="/static/assets/favicon.ico" type="image/x-icon">
+
+    <!-- 1. Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback" />
+
+    <!-- 2. Bootstrap Icons (latest) -->
+    <link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+      integrity="sha256-pdY4ejLKO67E0CM2tbPtq1DJ3VGDVVdqAR6j3ZwdiE4="
+      crossorigin="anonymous">
+
+    <!-- 2. Font Awesome (latest) -->
+    <link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css"
+      integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c="
+      crossorigin="anonymous" />
+
+    <!-- 3. OverlayScrollbars (optional, for the sidebar scroller) -->
+    <link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css" />
+
+    <!-- 4. Theme style: AdminLTE 4 - including Bootstrap 5 -->
+    <link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0/dist/css/adminlte.min.css"
+      integrity="sha256-lalK6iapuNKGhnAUWocFdzfnnhN9yt67N2kW8j8RUyw="
+      crossorigin="anonymous" />
+
+    <!-- 5. Tabulator - Interactive table generation JavaScript library -->
+    <link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.4.0/dist/css/tabulator.min.css"
+      integrity="sha256-k6sEbOgNjBkzsGsw1TC1g1eWBHr/LgV6HsRYKHulUVs="
+      crossorigin="anonymous" />
+
     {% block stylesheets %}{% endblock stylesheets %}
   </head>
 
@@ -45,15 +68,28 @@
     <!-- app-wrapper -->
 
     <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- AdminLTE 4 (Bootstrap 5 Admin Dashboard) -->
-    <script src="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-rc7/dist/js/adminlte.min.js"
-      integrity="sha256-fQLRmwAkBzo9vMF8fPUXleTOx6HTKEPWzk4evkKEOGU="
+    <!-- script src="https://code.jquery.com/jquery-3.6.0.min.js"></script -->
+
+    <!-- 6. Bootstrap 5 bundled JS files - including Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
       crossorigin="anonymous">
     </script>
-    <!-- Bootstrap 5 -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js"
-      integrity="sha256-ew8UiV1pJH/YjpOEBInP1HxVvT/SfrCmwSoUzF9JIgc="
+
+    <!-- 7. OverlayScrollbars (optional, for the sidebar scroller) -->
+    <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js"
+      integrity="sha256-PWX3kZbY40OTPANHVfHlYREsGG4b/IV5xZLO8ztldLg="
+      crossorigin="anonymous">
+    </script>
+
+    <!-- 8. AdminLTE 4 — must load AFTER Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0/dist/js/adminlte.min.js"
+      integrity="sha256-O93/LKKIU6rm891QQnUnP0JUEVIDUqufmdR/IICsKlQ="
+      crossorigin="anonymous">
+    </script>
+
+    <!-- 9. Tabulator - Interactive table generation JavaScript library -->
+    <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.4.0/dist/js/tabulator.min.js"
+      integrity="sha256-ht+bmKfN4QmNjLwPGRa2mJlxUHmEKZvAtNKJpj7VIKA="
       crossorigin="anonymous">
     </script>
 

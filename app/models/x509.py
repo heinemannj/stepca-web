@@ -1,24 +1,29 @@
 from app.extensions import db
 
+
 class X509Cert(db.Model):
     __tablename__ = 'x509_certs'
     nkey = db.Column(db.LargeBinary, primary_key=True)
     nvalue = db.Column(db.LargeBinary)
+
 
 class X509CertData(db.Model):
     __tablename__ = 'x509_certs_data'
     nkey = db.Column(db.LargeBinary, primary_key=True)
     nvalue = db.Column(db.LargeBinary)
 
+
 class RevokedX509Cert(db.Model):
     __tablename__ = 'revoked_x509_certs'
     nkey = db.Column(db.LargeBinary, primary_key=True)
     nvalue = db.Column(db.LargeBinary)
 
+
 class X509Crl(db.Model):
     __tablename__ = 'x509_crl'
     nkey = db.Column(db.LargeBinary, primary_key=True)
     nvalue = db.Column(db.LargeBinary)
+
 
 class GeneratedCert(db.Model):
     __tablename__ = 'generated_certs'

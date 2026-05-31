@@ -52,12 +52,16 @@ def create_app(config_class=Config):
     from app.blueprint.step import api_bp as step_api_bp
     app.register_blueprint(step_api_bp)
 
+    from app.blueprint.system import bp as system_bp
+    app.register_blueprint(system_bp)
+
     # Register authentication blueprint
     from app.blueprint.auth.routes import auth_bp
     app.register_blueprint(auth_bp)
 
-    from app.blueprint.system import bp as system_bp
-    app.register_blueprint(system_bp)
+    # Register user profile blueprint
+    from app.blueprint.profile import bp as profile_bp
+    app.register_blueprint(profile_bp)
 
     # from app.blueprint.questions import bp as questions_bp
     # app.register_blueprint(questions_bp, url_prefix='/questions')

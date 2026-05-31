@@ -12,72 +12,86 @@
 
 <div class="app-main">
 
-{% include 'includes/header.html' %}
-
-  <!-- Flash Message -->
-  <div class="app-content">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-      {{ message }}
-      <button type="button" class="close" data-bs-dismiss="alert">&times;</button>
-    </div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
-  </div>
-  <!-- Flash Message -->
+  {% include 'includes/header.html' %}
+  {% include 'includes/flash_message.html' %}
 
   <!-- Main content -->
   <section class="app-content">
     <div class="d-flex justify-content-end mb-3">
-      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createAdminModal">
-        Add Admin
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+        Add
       </button>
     </div>
     <div class="card">
       <div class="card-body table-responsive p-0">
-        <table class="table table-hover text-sm table-striped">
+        <table class="table table-hover table-sm table-striped" style="font-size:10pt" id="app-table">
           <thead>
             <tr>
               <th>Admin ID</th>
-              <th>ProvisionerID</th>
-              <th>Name</th>
+              <th>Subject</th>
               <th>Type</th>
-              <th>Created At</th>
+              <th>Status</th>
+              <th>Provisioner</th>
+              <th>Created</th>
+              <th>Deleted</th>
               <th style="width: 150px;">Actions</th>
             </tr>
           </thead>
           <tbody>
             {% for admin in admins %}
             <tr>
-              <td><code>{{ admin.id }}</code></td>
-              <td>{{ admin.provisioner_id or "-" }}</td>
-              <td>{{ admin.subject or "n/a" }}</td>
+              <td><code>{{ admin.data.id }}</code></td>
+              <td>{{ admin.data.subject or "-" }}</td>
               <td>
-                {% if admin.type == 1 %}
-                ADMIN
-                {% elif admin.type == 2 %}
-                SUPER_ADMIN
+                {% if admin.data.type == 1 %}
+                  ADMIN
+                {% elif admin.data.type == 2 %}
+                  SUPER_ADMIN
                 {% else %}
-                {{ admin.type }}
+                  {{ admin.data.type }}
                 {% endif %}
               </td>
-              <td>{% set created_at_seconds = admin.get('created_at', {}).get('seconds', None) %}
-                {% if created_at_seconds %}
-                {{ created_at_seconds | format_date }}
-                {% else %}
-                No timestamp available
-                {% endif %}</td>
               <td>
-                <!-- Edit button triggers modal -->
-                <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#editAdminModal"
-                  data-admin='{{ admin | tojson | safe }}'>
+                {% if admin.status %}
+                  <span class="badge text-bg-{{
+                      'success' if admin.status == 'valid' else 'secondary'
+                    }}">{{ admin.status or "unknown" }}</span>
+                {% else %}
+                <em>—</em>
+                {% endif %}
+              </td>
+              <td>
+                {% if admin.provisioner.name %}
+                  <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#provisionerViewModal"
+                    data-bs-provisionerID='{{ admin.data.provisionerID | tojson | safe }}'
+                    style="--bs-btn-padding-y: 0; --bs-btn-padding-x: 0; font-size:10pt;">
+                    {{ admin.provisioner.name }}
+                  </button>
+                {% else %}
+                  <em>—</em>
+                {% endif %}
+              </td>
+              <td>{{ admin.data.createdAt or "n/a" }}</td>
+              <td>
+                {% if admin.data.deletedAt != '0001-01-01T00:00:00Z' %}
+                  {{ admin.data.deletedAt }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td>
+                <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#viewModal"
+                  data-bs-admin='{{ admin | tojson | safe }}'
+                  data-bs-provisioners='{{ provisioners | tojson | safe }}'>
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editModal"
+                  data-bs-admin='{{ admin | tojson | safe }}'
+                  data-bs-provisioners='{{ provisioners | tojson | safe }}'>
                   <i class="fas fa-edit"></i>
                 </button>
-                <a href="/step/admin/{{ admin.id }}/delete" class="btn btn-sm btn-danger"
-                  onclick="return confirm('Are you sure you want to delete this provisioner?')">
+                <a href="/step/admin/{{ admin.data.id }}/delete" class="btn btn-sm btn-danger"
+                  onclick="return confirm('Are you sure you want to delete this admin?')">
                   <i class="fas fa-trash"></i>
                 </a>
               </td>
@@ -88,18 +102,31 @@
       </div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="createAdminModal" tabindex="-1" role="dialog" aria-labelledby="createAdminModalLabel"
+    <!-- View Modal -->
+    <div class="modal fade" id="viewModal" tabindex="-1" role="dialog" aria-labelledby="viewModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">View - step-ca Admin</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-sm" id="viewModalBody">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Modal -->
+    <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel"
       aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="createAdminModalLabel">Create New Admin</h5>
-            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
+            <h5 class="modal-title" id="addModalLabel">Add - step-ca Admin</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
+          <div class="modal-body text-sm" id="viewModalBody">
             <form method="POST" action="{{ url_for('step.admins') }}">
               <div class="mb-3">
                 <label>Subject</label>
@@ -108,8 +135,8 @@
               <div class="mb-3">
                 <label>Provisioner</label>
                 <select name="provisioner" class="form-control" required>
-                  {% for id, name in provisioners.items() %}
-                  <option value="{{ name }}">{{ name }}</option>
+                  {% for provisioner in provisioners %}
+                  <option value="{{ name }}">{{ provisioner.data.name }}</option>
                   {% endfor %}
                 </select>
               </div>
@@ -121,8 +148,8 @@
                 </select>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Create Admin</button>
+                <button type="submit" class="btn btn-primary">OK</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
               </div>
             </form>
           </div>
@@ -130,48 +157,61 @@
       </div>
     </div>
 
-    <!-- Edit Admin Modal -->
-    <div class="modal fade" id="editAdminModal" tabindex="-1" role="dialog" aria-labelledby="editAdminModalLabel"
-      aria-hidden="true">
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="editAdminModalLabel">Edit Admin</h5>
-            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
+            <h5 class="modal-title" id="editModalLabel">Edit - step-ca Admin</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <form id="editAdminForm" method="POST" action="{{ url_for('step.admins') }}">
-              <input type="hidden" name="admin_id" id="editAdminId">
+            <form id="editForm" method="POST" action="{{ url_for('step.admins') }}">
+              <input type="hidden" name="admin_id" id="editFormAdminId" readonly>
               <div class="mb-3">
                 <label>Subject</label>
-                <input type="text" name="subject" id="editAdminSubject" class="form-control" required>
+                <input type="text" name="subject" id="editFormSubject" class="form-control" required>
               </div>
               <div class="mb-3">
                 <label>Provisioner</label>
-                <select name="provisioner" id="editAdminProvisioner" class="form-control" required>
-                  {% for id, name in provisioners.items() %}
-                  <option value="{{ name }}">{{ name }}</option>
+                <select name="provisioner" id="editFormProvisioner" class="form-control" required>
+                  {% for provisioner in provisioners %}
+                  <option value="{{ name }}">{{ provisioner.data.name }}</option>
                   {% endfor %}
                 </select>
               </div>
               <div class="mb-3">
                 <label>Type</label>
-                <select name="type" id="editAdminType" class="form-control" required>
+                <select name="type" id="editFormType" class="form-control" required>
                   <option value=1>ADMIN</option>
                   <option value=2>SUPER_ADMIN</option>
                 </select>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <button type="submit" class="btn btn-primary">OK</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
               </div>
             </form>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- step-ca Provisioner View Modal -->
+    <div class="modal fade" id="provisionerViewModal" tabindex="-1" role="dialog" aria-labelledby="provisionerViewModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">View - step-ca Provisioner</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-sm" id="provisionerViewModalBody">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+
   </section>
   <!-- /.content -->
 
@@ -181,20 +221,77 @@
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
-
+    
 <script>
-  $('#editAdminModal').on('show.bs.modal', function (event) {
-    var button = $(event.relatedTarget);
-    var admin = button.data('admin');
-    // Fill the form fields
-    $('#editAdminId').val(admin.id);
-    $('#editAdminSubject').val(admin.subject);
-    // Map provisioner_id to name using provisioners Jinja variable
-    var provisionerMap = {{ provisioners| tojson }};
-    var provName = provisionerMap[admin.provisioner_id] || admin.provisioner_id;
-    $('#editAdminProvisioner').val(provName);
-    $('#editAdminType').val(admin.type);
+
+  const editModal = document.querySelector('#editModal');
+  editModal.addEventListener('show.bs.modal', function (event) {
+    // Get the reference of the triggering button 
+    // and retrieve the value from the attribute
+    const modalButton = event.relatedTarget;
+    const admin = JSON.parse(modalButton.getAttribute('data-bs-admin'));
+    const provisioners = JSON.parse(modalButton.getAttribute('data-bs-provisioners'));
+
+    const provName = provisioners[admin.data.provisionerID] || admin.data.provisionerID;
+
+    document.getElementById('editFormAdminId').value = admin.nkey;
+    document.getElementById('editFormSubject').value = admin.data.subject;
+    document.getElementById('editFormProvisioner').value = provName;
+    document.getElementById('editFormType').value = admin.data.type;
   });
+
+
+  const viewModal = document.querySelector('#viewModal');
+  viewModal.addEventListener('show.bs.modal', function (event) {
+    // Get the reference of the triggering button 
+    // and retrieve the value from the attribute
+    const modalButton = event.relatedTarget;
+    const admin = JSON.parse(modalButton.getAttribute('data-bs-admin'));
+    const provisioners = JSON.parse(modalButton.getAttribute('data-bs-provisioners'));
+
+    const provName = provisioners[admin.data.provisionerID] || admin.data.provisionerID;
+    jsonStr = JSON.stringify(admin, null, 4);
+
+    const modalBody = document.getElementById("viewModalBody");
+
+    modalBody.innerHTML = `
+      <p><strong>Admin ID:</strong> <code>${admin.data.id}</code></p>
+      <pre>${jsonStr}</pre>
+    `;
+  });
+
+
+  // Function for provisionerViewModal
+  const provisionerViewModal = document.querySelector('#provisionerViewModal');
+  provisionerViewModal.addEventListener('show.bs.modal', function (event) {
+    // Get the reference of the triggering button 
+    // and retrieve the value from the attribute
+    const modalButton = event.relatedTarget;
+    const provisioner = JSON.parse(modalButton.getAttribute('data-bs-provisionerID'));
+    const jsonStr = JSON.stringify(provisioner, null, 4);
+
+    const modalBody = document.getElementById("provisionerViewModalBody");
+
+    fetch(`/api/step/provisioners/${provisioner}`)
+      .then(resp => resp.json())
+      .then(provisioner => {
+        if (provisioner.error) {
+          modalBody.innerHTML = `<div class="alert alert-danger">⚠️ ${provisioner.error}</div>`;
+        } else {
+          const jsonStr = JSON.stringify(provisioner, null, 4);
+          modalBody.innerHTML = `
+            <p><strong>Provisioner ID:</strong> <code>${provisioner.data.id}</code></p>
+            <p><strong>Name:</strong> ${provisioner.data.name}</br>
+              <strong>Status:</strong> ${provisioner.status}</p>
+            <pre>${jsonStr}</pre>
+          `;
+        }
+      })
+      .catch(() => {
+        modalBody.innerHTML = `<div class="alert alert-danger">⚠️ Failed to load provisioner.</div>`;
+      });
+  });
+
 </script>
 
 {% endblock javascripts %}

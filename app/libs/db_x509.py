@@ -1,5 +1,3 @@
-# services/x509_service.py
-
 import json
 from datetime import datetime
 import pytz
@@ -11,135 +9,153 @@ from app.models.x509 import X509Cert, X509CertData, RevokedX509Cert, X509Crl, Ge
 import base64
 
 def get_x509_certs():
-    certs = []
-
-    x509_certs = X509Cert.query.all()
-    revoked_certs = get_revoked_x509_certs()
-    revoked_serials = {cert["data"]["Serial"] for cert in revoked_certs}
+    items = []
+    counter = {
+        "total": 0,
+        "valid": 0,
+        "expired": 0,
+        "renewed": 0,
+        "revoked": 0
+    }
+    revoked_serials = {cert["data"]["Serial"] for cert in get_revoked_x509_certs()}
     now = datetime.utcnow().replace(tzinfo=pytz.UTC)
 
-    for cert in x509_certs:
+    for row in X509Cert.query.all():
         try:
-            cert_id = cert.nkey.hex()
-            #cert_id = cert.nkey.decode("utf-8", errors="ignore")
-            cert_bytes = cert.nvalue
-            data = parse_cert_from_bytes(cert_bytes)
-            cert_metadata = get_x509_certs_data_by_id(cert_id)
+            nkey = row.nkey.decode("utf-8", errors="ignore")
+            data = parse_cert_from_bytes(row.nvalue)
+            provisioner = get_x509_certs_data_by_id(nkey)
             validation = {
                 "status": None,
                 "expired": None,
-                "revoked": None,
-                "revoked_at": None,
-                "revoked_by": None
+                "revoked": None
             }
+            revocation = {}
 
-            if cert_id in revoked_serials:
-                revoked_data = get_revoked_x509_certs_by_id(cert_id)
+            if nkey in revoked_serials:
+                revoked_data = get_revoked_x509_certs_by_id(nkey)
                 validation["revoked"] = "true"
-                validation["revoked_at"] = revoked_data["data"]["RevokedAt"]
-                validation["revoked_by"] = revoked_data["data"]["provisioner_name"]
+                revocation = revoked_data["data"]
 
             try:
                 start = datetime.fromisoformat(data["validity"].get("start", "").replace("Z", "+00:00")).astimezone(pytz.UTC)
                 end = datetime.fromisoformat(data["validity"].get("end", "").replace("Z", "+00:00")).astimezone(pytz.UTC)
 
-                if start <= now <= end:
+                if now > end:
+                    validation["expired"] = "true"
+
+                if validation["revoked"] == "true":
+                    validation["status"] = "revoked"
+                elif start <= now <= end:
                     validation["status"] = "valid"
                 else:
-                    validation["expired"] = "true"
+                    validation["status"] = "expired"
+
             except Exception as e:
-                print(f"Invalid cert dates for {cert_id}: {e}")
+                print(f"Invalid cert dates for {nkey}: {e}")
 
-            certs.append({"nkey": cert_id, "data": data, "provisioner": cert_metadata["data"]["provisioner"], "validation": validation})
+            items.append({"nkey": nkey, "data": data, "provisioner": provisioner["data"]["provisioner"], "revocation": revocation, "validation": validation})
         except Exception as e:
-            certs.append({"nkey": cert.nkey.hex(), "data": {"subject_dn": "[error decoding cert]", "error": str(e)}})
+            items.append({"nkey": row.nkey.hex(), "data": {"subject_dn": "[error decoding cert]", "error": str(e)}})
 
-    for cert in certs:
-        subject_map = {c["nkey"] for c in certs if (c["data"]["subject_dn"] == cert["data"]["subject_dn"] and c["validation"]["status"] == "valid")}
-        if subject_map and cert["validation"]["status"] != "valid":
-            cert["validation"]["status"] = "renewed"
-        elif not subject_map:
-            cert["validation"]["status"] = "expired"
-    return certs
+    for row in items:
+        subject_map = {c["nkey"] for c in items if (c["data"]["subject_dn"] == row["data"]["subject_dn"] and c["data"]["validity"]["end"] > row["data"]["validity"]["end"])}
+        if subject_map and row["validation"]["status"] != "valid":
+            row["validation"]["status"] = "renewed"
+
+        if row["validation"]["status"] == "renewed":
+            counter["renewed"] += 1
+        elif row["validation"]["status"] == "valid":
+            counter["valid"] += 1
+        elif row["validation"]["status"] == "revoked":
+            counter["revoked"] += 1
+        elif row["validation"]["status"] == "expired":
+            counter["expired"] += 1
+
+    counter["all"] = len(items)
+    counter["total"] = counter["valid"] + counter["revoked"] + counter["expired"]
+
+    return items, counter
 
 
-def get_x509_certs_by_id(cert_id):
-    all_certs = get_x509_certs()
-    return next((c for c in all_certs if c["nkey"] == cert_id), None)
-
-
-def get_x509_certs_by_serial(serial):
-    all_certs = get_x509_certs()
-    return next((c for c in all_certs if c["data"]["serial_number"] == serial), None)
+def get_x509_certs_by_id(id: str):
+    certs, counter = get_x509_certs()
+    return next((c for c in certs if c["nkey"] == id), None)
 
 
 def get_x509_certs_data():
-    results = []
+    items = []
     for row in X509CertData.query.all():
         try:
-            serial = row.nkey.hex()
-            value = json.loads(row.nvalue)
-            results.append({"nkey": serial, "data": value})
+            #nkey = row.nkey.hex()
+            nkey = cert.nkey.decode("utf-8", errors="ignore")
+            data = json.loads(row.nvalue)
+            items.append({"nkey": nkey, "data": data})
         except Exception as e:
-            results.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
-    return results
+            items.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
+    return items
 
 
-def get_x509_certs_data_by_id(cert_id):
+def get_x509_certs_data_by_id(id: str):
     for row in X509CertData.query.all():
         try:
-            serial = row.nkey.hex()
-            value = json.loads(row.nvalue)
-            if serial == cert_id:
-                return {"nkey": serial, "data": value}
+            #nkey = row.nkey.hex()
+            nkey = row.nkey.decode("utf-8", errors="ignore")
+            if nkey == id:
+                data = json.loads(row.nvalue)
+                return {"nkey": nkey, "data": data}
         except Exception as e:
             pass
     return None
 
 
 def get_revoked_x509_certs():
-    certs = []
+    items = []
     for row in RevokedX509Cert.query.all():
         try:
-            serial = row.nkey.hex()
-            value = json.loads(row.nvalue)
-            certs.append({"nkey": serial, "data": value})
+            #nkey = row.nkey.hex()
+            nkey = row.nkey.decode("utf-8", errors="ignore")
+            data = json.loads(row.nvalue)
+            items.append({"nkey": nkey, "data": data})
         except Exception as e:
-            certs.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
-    return certs
+            items.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
+    return items
 
 
-def get_revoked_x509_certs_by_id(cert_id):
-    prov_map = {p["data"]["id"]: p["data"]["name"] for p in get_provisioners() if "data" in p}
+def get_revoked_x509_certs_by_id(id: str):
+    provisioners, provisioners_counter = get_provisioners()
+    prov_map = {p["data"]["id"]: p["data"]["name"] for p in provisioners if "data" in p}
     for row in RevokedX509Cert.query.all():
         try:
-            value = json.loads(row.nvalue)
-            serial = value.get("Serial", "").lower()
-            value["provisioner_name"] = prov_map.get(value.get("ProvisionerID"), "—")
-            if serial == cert_id:
-                return {"nkey": serial, "data": value}
+            nkey = row.nkey.decode("utf-8", errors="ignore")
+            if nkey == id:
+                data = json.loads(row.nvalue)
+                data["ProvisionerName"] = prov_map.get(data.get("ProvisionerID"), "—")
+                return {"nkey": nkey, "data": data}
         except Exception as e:
             pass
     return None
 
-
+# Usage only by api_get_revoked_x509_with_cert_info
+#
 def get_revoked_x509_with_cert_info():
-    revocations = []
-    rows = RevokedX509Cert.query.all()
-    cert_map = {c["nkey"]: c["data"] for c in get_x509_certs()}
-    prov_map = {p["data"]["id"]: p["data"]["name"] for p in get_provisioners() if "data" in p}
+    items = []
+    certs, counter = get_x509_certs()
+    provisioners, provisioners_counter = get_provisioners()
+    cert_map = {c["nkey"]: c["data"] for c in certs}
+    prov_map = {p["data"]["id"]: p["data"]["name"] for p in provisioners if "data" in p}
 
-    for row in rows:
+    for row in RevokedX509Cert.query.all():
         try:
-            serial = row.nkey.hex()
-            value = json.loads(row.nvalue)
-            serial_hex = value.get("Serial", "").lower()
-            cert_info = cert_map.get(serial_hex)
-            value["provisioner_name"] = prov_map.get(value.get("ProvisionerID"), "—")
-            revocations.append({"nkey": serial, "data": value, "cert": cert_info})
+            #nkey = row.nkey.hex()
+            nkey = row.nkey.decode("utf-8", errors="ignore")
+            data = json.loads(row.nvalue)
+            certificate = cert_map.get(nkey)
+            data["ProvisionerName"] = prov_map.get(data.get("ProvisionerID"), "—")
+            items.append({"nkey": nkey, "data": data, "certificate": certificate})
         except Exception as e:
-            revocations.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
-    return revocations
+            items.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
+    return items
 
 
 def get_generated_certs():
@@ -179,46 +195,42 @@ def save_generated_cert(serial, common_name, provisioner, csr_pem, cert_pem):
 
 
 def get_x509_active_certs():
-    x509_certs = get_x509_certs()
-    certs = []
-
-    for cert in x509_certs:
+    items = []
+    certs, counter = get_x509_certs()
+    for cert in certs:
         serial = cert["nkey"]
 
         if cert["validation"]["status"] == "valid":
-            certs.append(cert)
+            items.append(cert)
 
         # Enrich with `generated` flag
         generated_serials = {g["serial"] for g in get_generated_certs()}
 
-    for cert in certs:
+    for cert in items:
         if cert["data"].get("serial") in generated_serials:
             cert["data"]["generated"] = True
 
-    return certs
+    return items
 
 
 def get_x509_revoked_certs():
-    x509_certs = get_x509_certs()
-    certs = []
-
-    for cert in x509_certs:
-        serial = cert["nkey"]
-
-        if cert["validation"]["revoked"] == "true":
-            certs.append(cert)
-
-    return certs
+    items = []
+    certs, counter = get_x509_certs()
+    for item in certs:
+        if item["validation"]["revoked"] == "true":
+            items.append(item)
+    return items
 
 
 def get_x509_crl():
-    item = []
+    items = []
     for row in X509Crl.query.all():
         try:
-            serial = row.nkey.hex()
-            value = json.loads(row.nvalue)
+            #nkey = row.nkey.hex()
+            nkey = row.nkey.decode("utf-8", errors="ignore")
+            data = json.loads(row.nvalue)
             
-            item.append({"nkey": serial, "data": value})
+            items.append({"nkey": nkey, "data": data})
         except Exception as e:
-            item.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
-    return item
+            items.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
+    return items

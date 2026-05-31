@@ -13,52 +13,109 @@
 <div class="app-main">
 
   {% include 'includes/header.html' %}
+  {% include 'includes/flash_message.html' %}
 
   <!-- Main content -->
   <section class="app-content">
     <div class="card">
       <div class="card-body table-responsive p-0">
-        <table class="table table-hover text-sm table-striped">
+        <table class="table table-hover table-sm table-striped" style="font-size:10pt" id="app-table">
           <thead>
             <tr>
               <th>Account ID</th>
               <th>Provisionner</th>
               <th>Contact</th>
               <th>Status</th>
-              <th>Created At</th>
+              <th>Created</th>
+              <th>Deleted</th>
+              <th style="width: 120px;">Actions</th>
             </tr>
           </thead>
           <tbody>
             {% for account in accounts %}
-            {% set data = account.data %}
-            <tr>
-              <td><code>{{ account.nkey }}</code></td>
-              <td>{{ data.provisionerName or "-" }}</td>
-              <td>
-                {% if data.contact %}
-                {{ data.contact | join(', ') }}
-                {% else %}
-                <em>—</em>
-                {% endif %}
-              </td>
-              <td>
-                {% if data.status %}
-                <span class="badge badge-{{
-                      'success' if data.status == 'valid' else
-                      'warning' if data.status == 'pending' else
-                      'danger' if data.status == 'invalid' else 'secondary'
-                    }}">{{ data.status or "unknown" }}</span>
-                {% else %}
-                <em>—</em>
-                {% endif %}
-              </td>
-              <td>{{ data.createdAt or "—" }}</td>
-            </tr>
+              {% set data = account.data %}
+              <tr>
+                <td><code>{{ account.nkey }}</code></td>
+                <td>
+                  {% if data.provisionerName %}
+                    <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#provisionerViewModal"
+                      data-bs-provisionerID='{{ account.data.provisionerID | tojson | safe }}'
+                      style="--bs-btn-padding-y: 0; --bs-btn-padding-x: 0; font-size:10pt">
+                      {{ data.provisionerName }}
+                    </button>
+                  {% else %}
+                    <em>—</em>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if data.contact %}
+                  {{ data.contact | join(', ') }}
+                  {% else %}
+                  <em>—</em>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if data.status %}
+                    <span class="badge text-bg-{{
+                        'success' if data.status == 'valid' else
+                        'warning' if data.status == 'pending' else
+                        'danger' if data.status == 'invalid' else 'secondary'
+                      }}">{{ data.status or "unknown" }}</span>
+                  {% else %}
+                  <em>—</em>
+                  {% endif %}
+                </td>
+                <td>{{ data.createdAt or "—" }}</td>
+                <td>
+                  {% if data.deactivatedAt != '0001-01-01T00:00:00Z' %}
+                    {{ data.deactivatedAt }}
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#accountViewModal"
+                    data-bs-account='{{ account | tojson | safe }}'>
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </td>
+              </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
+
+    <!-- ACME Account View Modal -->
+    <div class="modal fade" id="accountViewModal" tabindex="-1" role="dialog" aria-labelledby="accountViewModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">View - ACME Account</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-sm" id="accountViewModalBody">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Provisioner View Modal -->
+    <div class="modal fade" id="provisionerViewModal" tabindex="-1" role="dialog" aria-labelledby="provisionerViewModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">View - step-ca Provisioner</h5>
+            <button type="button" class="btn-close"data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-sm" id="provisionerViewModalBody">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+
   </section>
   <!-- /.content -->
 
@@ -67,4 +124,60 @@
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+
+<script>
+
+  // Function for accountViewModal
+  const accountViewModal = document.querySelector('#accountViewModal');
+  accountViewModal.addEventListener('show.bs.modal', function (event) {
+    // Get the reference of the triggering button 
+    // and retrieve the value from the attribute
+    const modalButton = event.relatedTarget;
+    const account = JSON.parse(modalButton.getAttribute('data-bs-account'));
+    const jsonStr = JSON.stringify(account, null, 4);
+
+    const modalBody = document.getElementById("accountViewModalBody");
+
+    modalBody.innerHTML = `
+      <p><strong>Account ID:</strong> <code>${account.nkey}</code></p>
+      <p><strong>Name:</strong> ${account.data.provisionerName}</br>
+        <strong>Status:</strong> ${account.status}</p>
+      <pre>${jsonStr}</pre>
+    `;
+  });
+
+
+  // Function for provisionerViewModal
+  const provisionerViewModal = document.querySelector('#provisionerViewModal');
+  provisionerViewModal.addEventListener('show.bs.modal', function (event) {
+    // Get the reference of the triggering button 
+    // and retrieve the value from the attribute
+    const modalButton = event.relatedTarget;
+    const ID = JSON.parse(modalButton.getAttribute('data-bs-provisionerID'));
+
+    const modalBody = document.getElementById("provisionerViewModalBody");
+
+    fetch(`/api/step/provisioners/${ID}`)
+      .then(resp => resp.json())
+      .then(provisioner => {
+        if (provisioner.error) {
+          modalBody.innerHTML = `<div class="alert alert-danger">⚠️ ${provisioner.error}</div>`;
+        } else {
+          const jsonStr = JSON.stringify(provisioner, null, 4);
+          modalBody.innerHTML = `
+            <p><strong>Provisioner ID:</strong> <code>${provisioner.data.id}</code></p>
+            <p><strong>Name:</strong> ${provisioner.data.name}</br>
+              <strong>Status:</strong> ${provisioner.status}</p>
+            <pre>${jsonStr}</pre>
+          `;
+        }
+      })
+      .catch(() => {
+        modalBody.innerHTML = `<div class="alert alert-danger">⚠️ Failed to load provisioner.</div>`;
+      });
+  });
+
+</script>
+
+{% endblock javascripts %}

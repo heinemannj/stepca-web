@@ -12,64 +12,163 @@
 
 <div class="app-main">
 
-{% include 'includes/header.html' %}
+  {% include 'includes/header.html' %}
+  {% include 'includes/flash_message.html' %}
 
   <!-- Main content -->
   <section class="app-content">
     <div class="card">
       <div class="card-body table-responsive p-0">
-        <table class="table table-hover text-sm table-striped">
+        <table class="table table-hover table-sm table-striped" style="font-size:10pt" id="app-table">
           <thead>
             <tr>
               <th>Order ID</th>
+              <th>Certificate ID</th>
               <th>Identifiers</th>
               <th>Status</th>
               <th>Created</th>
               <th>Expires</th>
-              <th>Certificate</th>
+              <th>Account</th>
+              <th>Authorization IDs</th>
+              <th style="width: 120px;">Actions</th>
             </tr>
           </thead>
           <tbody>
             {% for order in orders %}
-            {% set data = order.data %}
-            <tr>
-              <td><code>{{ order.nkey }}</code></td>
-              <td>
-                {% if data.identifiers %}
-                {% for i in data.identifiers %}
-                {{ i.type }}: {{ i.value }}<br>
-                {% endfor %}
-                {% else %}
-                <em>—</em>
-                {% endif %}
-              </td>
-              <td>
-                {% if data.status %}
-                <span class="badge badge-{{
-                      'success' if data.status == 'valid' else
-                      'warning' if data.status == 'pending' else
-                      'danger' if data.status == 'invalid' else 'secondary'
-                    }}">{{ data.status }}</span>
-                {% else %}
-                <em>—</em>
-                {% endif %}
-              </td>
-              <td>{{ data.createdAt or '—' }}</td>
-              <td>{{ data.expiresAt or '—' }}</td>
-              <td>
-                {% if data.certificate %}
-                <a href="#" onclick="loadCert('{{ data.certificate }}')" data-bs-toggle="modal"
-                  data-bs-target="#certModal">View</a>
-                {% else %}
-                <em>—</em>
-                {% endif %}
-              </td>
-            </tr>
+              {% set data = order.data %}
+              <tr>
+                <td><code>{{ order.nkey }}</code></td>
+                <td>
+                  {% if data.certificate %}
+                    <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#certificateViewModal"
+                      data-bs-certificateID='{{ order.data.certificate | tojson | safe }}'
+                      style="--bs-btn-padding-y: 0; --bs-btn-padding-x: 0; font-size:10pt;">
+                      <code>{{ order.data.certificate }}</code>
+                    </button>
+                  {% else %}
+                    <em>—</em>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if data.identifiers %}
+                    {% for i in data.identifiers %}
+                      {{ i.type }}: {{ i.value }}<br>
+                    {% endfor %}
+                  {% else %}
+                    <em>—</em>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if data.status %}
+                    <span class="badge text-bg-{{
+                        'success' if data.status == 'valid' else
+                        'warning' if data.status == 'pending' else
+                        'danger' if data.status == 'invalid' else 'secondary'
+                      }}">{{ data.status }}
+                    </span>
+                  {% else %}
+                    <em>—</em>
+                  {% endif %}
+                </td>
+                <td>{{ data.createdAt or '—' }}</td>
+                <td>{{ data.expiresAt or '—' }}</td>
+                <td>
+                  {% if order.account.provisionerName %}
+                    <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#accountViewModal"
+                      data-bs-accountID='{{ order.data.accountID | tojson | safe }}'
+                      style="--bs-btn-padding-y: 0; --bs-btn-padding-x: 0; font-size:10pt;">
+                      {{ order.account.provisionerName }}
+                    </button>
+                  {% else %}
+                    <em>—</em>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if data.authorizationIDs %}
+                    {% for i in data.authorizationIDs %}
+                      <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#authorizationViewModal"
+                        data-bs-authorizationID='{{ i | tojson | safe }}'
+                        style="--bs-btn-padding-y: 0; --bs-btn-padding-x: 0; font-size:10pt;">
+                        <code>{{ i }}</code>
+                      </button></br>
+                    {% endfor %}
+                  {% else %}
+                    <em>—</em>
+                  {% endif %}
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#orderViewModal"
+                    data-bs-order='{{ order | tojson | safe }}'>
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </td>
+              </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
+
+    <!-- ACME Order View Modal -->
+    <div class="modal fade" id="orderViewModal" tabindex="-1" role="dialog" aria-labelledby="orderViewModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">View - ACME Order</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-sm" id="orderViewModalBody">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACME Certificate View Modal -->
+    <div class="modal fade" id="certificateViewModal" tabindex="-1" role="dialog" aria-labelledby="certificateViewModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">View - ACME Certificate</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-sm" id="certificateViewModalBody">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACME Authorization View Modal -->
+    <div class="modal fade" id="authorizationViewModal" tabindex="-1" role="dialog" aria-labelledby="authorizationViewModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">View - ACME Authorization</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-sm" id="authorizationViewModalBody">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACME Account View Modal -->
+    <div class="modal fade" id="accountViewModal" tabindex="-1" role="dialog" aria-labelledby="accountViewModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">View - ACME Account</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-sm" id="accountViewModalBody">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+
   </section>
   <!-- /.content -->
 
@@ -78,4 +177,123 @@
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+
+<script>
+
+  // Function for orderViewModal
+  const orderViewModal = document.querySelector('#orderViewModal');
+  orderViewModal.addEventListener('show.bs.modal', function (event) {
+    // Get the reference of the triggering button 
+    // and retrieve the value from the attribute
+    const modalButton = event.relatedTarget;
+    const order = JSON.parse(modalButton.getAttribute('data-bs-order'));
+    const jsonStr = JSON.stringify(order, null, 4);
+
+    const modalBody = document.getElementById("orderViewModalBody");
+
+    modalBody.innerHTML = `
+      <p><strong>Order ID:</strong> <code>${order.nkey}</code></p>
+
+      <pre>${jsonStr}</pre>
+    `;
+  });
+
+
+  // Function for certificateViewModal
+  const certificateViewModal = document.querySelector('#certificateViewModal');
+  certificateViewModal.addEventListener('show.bs.modal', function (event) {
+    // Get the reference of the triggering button 
+    // and retrieve the value from the attribute
+    const modalButton = event.relatedTarget;
+    const ID = JSON.parse(modalButton.getAttribute('data-bs-certificateID'));
+
+    const modalBody = document.getElementById("certificateViewModalBody");
+
+    fetch(`/api/acme/certs/${ID}`)
+      .then(resp => resp.json())
+      .then(cert => {
+        if (cert.error) {
+          modalBody.innerHTML = `<div class="alert alert-danger">⚠️ ${cert.error}</div>`;
+        } else {
+          const jsonStr = JSON.stringify(cert, null, 4);
+          modalBody.innerHTML = `
+            <p><strong>Serial Number:</strong> <code>${cert.data.serial_number}</code></p>
+            <p><strong>Subject:</strong> ${cert.data.subject_dn}</br>
+            <strong>Issuer:</strong> ${cert.data.issuer_dn}</p>
+            <p><strong>Status:</strong> ${cert.validation.status}</br>
+            <strong>Valid From:</strong> ${cert.data.validity.start}</br>
+            <strong>Valid To:</strong> ${cert.data.validity.end}</p>
+
+            <pre>${jsonStr}</pre>
+          `;
+        }
+      })
+      .catch(() => {
+        modalBody.innerHTML = `<div class="alert alert-danger">⚠️ Failed to load certificate.</div>`;
+      });
+  });
+
+
+  // Function for accountViewModal
+  const accountViewModal = document.querySelector('#accountViewModal');
+  accountViewModal.addEventListener('show.bs.modal', function (event) {
+    // Get the reference of the triggering button 
+    // and retrieve the value from the attribute
+    const modalButton = event.relatedTarget;
+    const ID = JSON.parse(modalButton.getAttribute('data-bs-accountID'));
+
+    const modalBody = document.getElementById("accountViewModalBody");
+
+    fetch(`/api/acme/accounts/${ID}`)
+      .then(resp => resp.json())
+      .then(account => {
+        if (account.error) {
+          modalBody.innerHTML = `<div class="alert alert-danger">⚠️ ${account.error}</div>`;
+        } else {
+          const jsonStr = JSON.stringify(account, null, 4);
+          modalBody.innerHTML = `
+            <p><strong>Account ID:</strong> <code>${account.data.id}</code></p>
+
+            <pre>${jsonStr}</pre>
+          `;
+        }
+      })
+      .catch(() => {
+        modalBody.innerHTML = `<div class="alert alert-danger">⚠️ Failed to load account.</div>`;
+      });
+  });
+
+
+  // Function for authorizationViewModal
+  const authorizationViewModal = document.querySelector('#authorizationViewModal');
+  authorizationViewModal.addEventListener('show.bs.modal', function (event) {
+    // Get the reference of the triggering button 
+    // and retrieve the value from the attribute
+    const modalButton = event.relatedTarget;
+    const ID = JSON.parse(modalButton.getAttribute('data-bs-authorizationID'));
+
+    const modalBody = document.getElementById("authorizationViewModalBody");
+
+    fetch(`/api/acme/authzs/${ID}`)
+      .then(resp => resp.json())
+      .then(authorization => {
+        if (authorization.error) {
+          modalBody.innerHTML = `<div class="alert alert-danger">⚠️ ${authorization.error}</div>`;
+        } else {
+          const jsonStr = JSON.stringify(authorization, null, 4);
+          modalBody.innerHTML = `
+            <p><strong>Authorization ID:</strong> <code>${authorization.data.id}</code></p>
+
+            <pre>${jsonStr}</pre>
+          `;
+        }
+      })
+      .catch(() => {
+        modalBody.innerHTML = `<div class="alert alert-danger">⚠️ Failed to load authorization.</div>`;
+      });
+  });
+
+</script>
+
+{% endblock javascripts %}

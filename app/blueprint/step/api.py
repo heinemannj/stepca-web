@@ -12,7 +12,7 @@ client = StepCAClient(CA_URL)
 @api_bp.route("/admins")
 @login_required
 def api_get_admins():
-    item = get_admins()
+    item, counter = get_admins()
 
     if item:
         return jsonify(item)
@@ -31,11 +31,22 @@ def api_list_admins():
 @api_bp.route("/provisioners")
 @login_required
 def api_get_provisioners():
-    item = get_provisioners()
+    item, counter = get_provisioners()
 
     if item:
         return jsonify(item)
     return jsonify({"error": "Provisioners not found"}), 404
+
+
+@api_bp.route("/provisioners/<id>")
+@login_required
+def api_get_provisioners_by_id(id):
+    item = get_provisioners_by_id(id)
+
+    if item:
+        return jsonify(item)
+    return jsonify({"error": "Provisioner not found"}), 404
+
 
 @api_bp.route("/provisioners_cli")
 @login_required

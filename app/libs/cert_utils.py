@@ -49,6 +49,14 @@ def parse_cert(leaf_b64):
                 "country": get_attr(cert.subject, NameOID.COUNTRY_NAME)
             },
             "issuer_dn": cert.issuer.rfc4514_string(),
+            "issuer": {
+                "common_name": get_attr(cert.issuer, NameOID.COMMON_NAME),
+                "organization": get_attr(cert.issuer, NameOID.ORGANIZATION_NAME),
+                "organizational_unit": get_attr(cert.issuer, NameOID.ORGANIZATIONAL_UNIT_NAME),
+                "locality": get_attr(cert.issuer, NameOID.LOCALITY_NAME),
+                "state": get_attr(cert.issuer, NameOID.STATE_OR_PROVINCE_NAME),
+                "country": get_attr(cert.issuer, NameOID.COUNTRY_NAME)
+            },
             "validity": {
                 "start": cert.not_valid_before_utc.isoformat(),
                 "end": cert.not_valid_after_utc.isoformat(),
@@ -102,6 +110,14 @@ def parse_cert_from_bytes(cert_bytes: bytes):
                 "country": get_attr(cert.subject, NameOID.COUNTRY_NAME)
             },
             "issuer_dn": cert.issuer.rfc4514_string(),
+            "issuer": {
+                "common_name": get_attr(cert.issuer, NameOID.COMMON_NAME),
+                "organization": get_attr(cert.issuer, NameOID.ORGANIZATION_NAME),
+                "organizational_unit": get_attr(cert.issuer, NameOID.ORGANIZATIONAL_UNIT_NAME),
+                "locality": get_attr(cert.issuer, NameOID.LOCALITY_NAME),
+                "state": get_attr(cert.issuer, NameOID.STATE_OR_PROVINCE_NAME),
+                "country": get_attr(cert.issuer, NameOID.COUNTRY_NAME)
+            },
             "validity": {
                 "start": cert.not_valid_before_utc.isoformat(),
                 "end": cert.not_valid_after_utc.isoformat(),

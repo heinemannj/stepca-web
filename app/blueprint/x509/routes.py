@@ -15,42 +15,41 @@ client = StepCAClient(CA_URL)
 @bp.route("/all")
 @login_required
 def all_certs():
-    certs = get_x509_certs()
-    provisioner_map = get_active_provisioner_map(get_provisioners())
+    certs, counter = get_x509_certs()
+    provisioners, provisioners_counter  = get_provisioners()
     return render_template(
         "x509/certs.html",
-        title="X.509 - All Certificates",
-        certs=certs,
-        provisioners=provisioner_map,
-        ca_url=CA_URL
+        title = "X.509 - All Certificates",
+        certs = certs,
+        provisioners = provisioners,
+        ts = time.time(),
+        ca_url = CA_URL
     )
 
 
 @bp.route("/active")
 @login_required
 def active_certs():
-    certs = get_x509_active_certs()
-    provisioner_map = get_active_provisioner_map(get_provisioners())
+    provisioners, provisioners_counter  = get_provisioners()
     return render_template(
         "x509/certs.html",
-        title="X.509 - Active Certificates",
-        certs=certs,
-        provisioners=provisioner_map,
-        ca_url=CA_URL
+        title = "X.509 - Active Certificates",
+        certs = get_x509_active_certs(),
+        provisioners = provisioners,
+        ca_url = CA_URL
     )
 
 
 @bp.route("/revoked")
 @login_required
 def revoked_certs():
-    certs = get_x509_revoked_certs()
-    provisioner_map = get_active_provisioner_map(get_provisioners())
+    provisioners, provisioners_counter  = get_provisioners()
     return render_template(
         "x509/certs.html",
-        title="X.509 - Revoked Certificates",
-        certs=certs,
-        provisioners=provisioner_map,
-        ca_url=CA_URL
+        title = "X.509 - Revoked Certificates",
+        certs = get_x509_revoked_certs(),
+        provisioners = provisioners,
+        ca_url = CA_URL
     )
 
 

@@ -63,8 +63,8 @@ def provisioner():
         else:
             flash(f"Failed to create provisioner '{data["name"]}'.", "danger")
 
-    provisioners = client.list_provisioners()
-    return render_template("step/provisioners.html", title="step-ca - Provisioners", provisioners=provisioners["provisioners"], ca_url=CA_URL)
+    provisioners, provisioners_counter  = get_provisioners()
+    return render_template("step/provisioners.html", title="step-ca - Provisioners", provisioners=provisioners, ca_url=CA_URL)
 
 
 @bp.route("/provisioner/<name>/delete")
@@ -93,10 +93,10 @@ def admins():
         else:
             flash(f"Failed to create admin '{subject}'.", "danger")
 
-    admins = client.list_admins()
-    provisioner_map = get_active_provisioner_map(get_provisioners())
+    admins, admins_counter = get_admins()
+    provisioners, provisioners_counter  = get_provisioners()
 
-    return render_template("step/admin.html", title="step-ca - Admins", admins=admins["admins"], provisioners=provisioner_map, ca_url=CA_URL)
+    return render_template("step/admin.html", title="step-ca - Admins", admins=admins, provisioners=provisioners, ca_url=CA_URL)
 
 
 @bp.route("/admin/<id>/delete")

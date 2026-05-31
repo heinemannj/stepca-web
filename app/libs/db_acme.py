@@ -1,257 +1,292 @@
-# import json
-# from .cert_utils import parse_cert
-# from .db_conn import get_connection
-
-# def get_acme_accounts():
-#     conn = get_connection()
-#     cur = conn.cursor()
-#     cur.execute("SELECT nkey, nvalue FROM acme_accounts")
-#     accounts = []
-#     for row in cur.fetchall():
-#         try:
-#             # Assume nkey is stored as UTF-8 text; if not, adjust accordingly.
-#             key = bytes(row[0]).decode('utf-8', errors='ignore')
-#             value = json.loads(bytes(row[1]))
-#             accounts.append({
-#                 "nkey": key,
-#                 "data": value
-#             })
-#         except Exception as e:
-#             print("Error parsing account:", e)
-#     conn.btn-close()
-#     return accounts
-
-# def get_acme_orders():
-#     conn = get_connection()
-#     cur = conn.cursor()
-#     cur.execute("SELECT nkey, nvalue FROM acme_orders")
-#     orders = []
-#     for row in cur.fetchall():
-#         try:
-#             key = bytes(row[0]).hex()
-#             value = json.loads(bytes(row[1]))
-#             orders.append({
-#                 "nkey": key,
-#                 "data": value
-#             })
-#         except Exception as e:
-#             print("Error parsing order:", e)
-#     conn.btn-close()
-#     return orders
-
-# def get_acme_certs():
-#     conn = get_connection()
-#     cur = conn.cursor()
-#     cur.execute("SELECT nkey, nvalue FROM acme_certs")
-#     certs = []
-
-#     for row in cur.fetchall():
-#         try:
-#             key = bytes(row[0]).hex()
-#             value = json.loads(bytes(row[1]))
-
-#             # Try to parse the leaf certificate if present
-#             parsed_info = {}
-#             if "leaf" in value:
-#                 parsed_info = parse_cert(value["leaf"])
-
-#             certs.append({
-#                 "nkey": key,
-#                 "data": {
-#                     **value,
-#                     **parsed_info
-#                 }
-#             })
-#         except Exception as e:
-#             print("❌ Error parsing ACME cert:", e)
-#     conn.btn-close()
-#     return certs
-
-# def get_acme_authzs():
-#     conn = get_connection()
-#     cur = conn.cursor()
-#     cur.execute("SELECT nkey, nvalue FROM acme_authzs")
-#     authzs = []
-#     for row in cur.fetchall():
-#         try:
-#             key = bytes(row[0]).hex()
-#             value = json.loads(bytes(row[1]))
-#             authzs.append({
-#                 "nkey": key,
-#                 "data": value
-#             })
-#         except Exception as e:
-#             print("Error parsing ACME authz:", e)
-#     conn.btn-close()
-#     return authzs
-
-# def get_acme_challenges():
-#     conn = get_connection()
-#     cur = conn.cursor()
-#     cur.execute("SELECT nkey, nvalue FROM acme_challenges")
-#     challenges = []
-#     for row in cur.fetchall():
-#         try:
-#             key = bytes(row[0]).hex()
-#             value = json.loads(bytes(row[1]))
-#             challenges.append({
-#                 "nkey": key,
-#                 "data": value
-#             })
-#         except Exception as e:
-#             print("Error parsing ACME challenge:", e)
-#     conn.btn-close()
-#     return challenges
-
-
-# def get_acme_cert_by_id(cert_id: str):
-#     conn = get_connection()
-#     cur = conn.cursor()
-#     cur.execute("SELECT nkey, nvalue FROM acme_certs")
-#     certs = []
-
-#     for row in cur.fetchall():
-#         try:
-#             key = bytes(row[0]).hex()
-#             value = json.loads(bytes(row[1]))
-
-#             # Try to parse the leaf certificate if present
-#             parsed_info = {}
-#             if "leaf" in value:
-#                 parsed_info = parse_cert(value["leaf"])
-
-#             certs.append({
-#                 "nkey": key,
-#                 "data": {
-#                     **value,
-#                     **parsed_info
-#                 }
-#             })
-#         except Exception as e:
-#             print("❌ Error parsing ACME cert:", e)
-#     for cert in certs:
-#         if cert["data"]["id"] == cert_id:
-#             return cert
-
-#     return None
-
-
-
 import json
 from datetime import datetime
 import pytz
 from app.extensions import db
 from .cert_utils import parse_cert_from_bytes, parse_cert
-from .db_step import get_provisioners
+from .db_x509 import get_revoked_x509_certs, get_revoked_x509_certs_by_id
 from app.models.acme import *
 
 
 def get_acme_accounts():
-    accounts = []
+    items = []
+    counter = {
+        "total": 0,
+        "valid": 0,
+        "deleted": 0
+    }
     for row in db.session.query(AcmeAccount).all():
         try:
-            key = row.nkey.decode('utf-8', errors='ignore')
-            value = json.loads(row.nvalue)
-            accounts.append({"nkey": key, "data": value})
+            #nkey = row.nkey.hex()
+            nkey = row.nkey.decode('utf-8', errors='ignore')
+            data = json.loads(row.nvalue)
+            if data.get('deactivatedAt', '') == '0001-01-01T00:00:00Z':
+                status = "valid"
+                counter["valid"] += 1
+            else:
+                status = "deleted"
+                counter["deleted"] += 1
+            items.append({"nkey": nkey, "data": data, "status": status})
         except Exception as e:
-            print("Error parsing account:", e)
-    return accounts
+            items.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
+
+    counter["total"] = len(items)
+
+    return items, counter
+
+
+def get_acme_account_by_id(id: str):
+    for row in db.session.query(AcmeAccount).all():
+        try:
+            #nkey = row.nkey.hex()
+            nkey = row.nkey.decode('utf-8', errors='ignore')
+            if nkey == id:
+                data = json.loads(row.nvalue)
+                if data.get('deactivatedAt', '') == '0001-01-01T00:00:00Z':
+                    status = "valid"
+                else:
+                    status = "deleted"
+                return {"nkey": nkey, "data": data, "status": status}
+        except Exception as e:
+            print("❌ Error parsing ACME account:", e)
+    return None
 
 
 def get_acme_orders():
-    orders = []
+    items = []
     for row in db.session.query(AcmeOrder).all():
         try:
-            key = row.nkey.hex()
-            value = json.loads(row.nvalue)
-            orders.append({"nkey": key, "data": value})
+            #nkey = row.nkey.hex()
+            nkey = row.nkey.decode("utf-8", errors="ignore")
+            data = json.loads(row.nvalue)
+            account_data = get_acme_account_by_id(data["accountID"])
+            account = {
+                "id": account_data["data"]["id"],
+                "provisionerID": account_data["data"]["provisionerID"],
+                "provisionerName": account_data["data"]["provisionerName"]
+            }
+            items.append({"nkey": nkey, "data": data, "account": account})
         except Exception as e:
-            print("Error parsing order:", e)
-    return orders
+            items.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
+    return items
 
 
 def get_acme_certs():
-    certs = []
+    items = []
+    counter = {
+        "total": 0,
+        "valid": 0,
+        "expired": 0,
+        "renewed": 0,
+        "revoked": 0
+    }
+    revoked_serials = {cert["data"]["Serial"] for cert in get_revoked_x509_certs()}
+    now = datetime.utcnow().replace(tzinfo=pytz.UTC)
+
     for row in db.session.query(AcmeCert).all():
         try:
-            key = row.nkey.hex()
-            value = json.loads(row.nvalue)
-            parsed_info = parse_cert(value["leaf"]) if "leaf" in value else {}
-            certs.append({"nkey": key, "data": {**value, **parsed_info}, "provisioner": {}, "validation": {}})
+            #nkey = row.nkey.hex()
+            nkey = row.nkey.decode("utf-8", errors="ignore")
+            data = json.loads(row.nvalue)
+
+            # Try to parse the leaf certificate if present
+            parsed_info = parse_cert(data["leaf"]) if "leaf" in data else {}
+            data = {**data, **parsed_info}
+
+            account_data = get_acme_account_by_id(data["accountID"])
+            account = {
+                "id": account_data["data"]["id"],
+                "provisionerID": account_data["data"]["provisionerID"],
+                "provisionerName": account_data["data"]["provisionerName"]
+            }
+            provisioner = {
+                "id": account_data["data"]["provisionerID"],
+                "name": account_data["data"]["provisionerName"],
+                "type": "ACME"
+            }
+            validation = {
+                "status": None,
+                "expired": None,
+                "revoked": None
+            }
+            revocation = {}
+
+            if data["serial_number"] in revoked_serials:
+                revoked_data = get_revoked_x509_certs_by_id(data["serial_number"])
+                validation["revoked"] = "true"
+                revocation = revoked_data["data"]
+
+            try:
+                start = datetime.fromisoformat(data["validity"].get("start", "").replace("Z", "+00:00")).astimezone(pytz.UTC)
+                end = datetime.fromisoformat(data["validity"].get("end", "").replace("Z", "+00:00")).astimezone(pytz.UTC)
+
+                if now > end:
+                    validation["expired"] = "true"
+
+                if validation["revoked"] == "true":
+                    validation["status"] = "revoked"
+                elif start <= now <= end:
+                    validation["status"] = "valid"
+                else:
+                    validation["status"] = "expired"
+
+            except Exception as e:
+                print(f"Invalid cert dates for {nkey}: {e}")
+
+            items.append({"nkey": nkey, "data": data, "account": account, "provisioner": provisioner, "validation": validation, "revocation": revocation})
         except Exception as e:
-            print("❌ Error parsing ACME cert:", e)
-    return certs
+           items.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
+
+    for row in items:
+        subject_map = {c["nkey"] for c in items if (c["data"]["subject_dn"] == row["data"]["subject_dn"] and c["data"]["validity"]["end"] > row["data"]["validity"]["end"])}
+        if subject_map and row["validation"]["status"] != "valid":
+            row["validation"]["status"] = "renewed"
+
+        if row["validation"]["status"] == "renewed":
+            counter["renewed"] += 1
+        elif row["validation"]["status"] == "valid":
+            counter["valid"] += 1
+        elif row["validation"]["status"] == "revoked":
+            counter["revoked"] += 1
+        elif row["validation"]["status"] == "expired":
+            counter["expired"] += 1
+
+    counter["all"] = len(items)
+    counter["total"] = counter["valid"] + counter["revoked"] + counter["expired"]
+
+    return items, counter
+
+
+def get_acme_cert_by_id(id: str):
+    for row in db.session.query(AcmeCert).all():
+        try:
+            #nkey = row.nkey.hex()
+            nkey = row.nkey.decode("utf-8", errors="ignore")
+            if nkey == id:
+                data = json.loads(row.nvalue)
+                parsed_info = parse_cert(data["leaf"]) if "leaf" in data else {}
+                data = {**data, **parsed_info}
+                account_data = get_acme_account_by_id(data["accountID"])
+                account = {
+                    "id": account_data["data"]["id"],
+                    "provisionerID": account_data["data"]["provisionerID"],
+                    "provisionerName": account_data["data"]["provisionerName"]
+                }
+                return {"nkey": nkey, "data": data, "account": account, "provisioner": {}, "validation": {}}
+        except Exception as e:
+            print("❌ Error parsing ACME certificate:", e)
+    return None
 
 
 def get_acme_authzs():
-    authzs = []
+    items = []
     for row in db.session.query(AcmeAuthz).all():
         try:
-            key = row.nkey.hex()
-            value = json.loads(row.nvalue)
-            authzs.append({"nkey": key, "data": value})
+            #nkey = row.nkey.hex()
+            nkey = row.nkey.decode("utf-8", errors="ignore")
+            data = json.loads(row.nvalue)
+            account_data = get_acme_account_by_id(data["accountID"])
+            account = {
+                "id": account_data["data"]["id"],
+                "provisionerID": account_data["data"]["provisionerID"],
+                "provisionerName": account_data["data"]["provisionerName"]
+            }
+            items.append({"nkey": nkey, "data": data, "account": account})
         except Exception as e:
-            print("Error parsing ACME authz:", e)
-    return authzs
+            items.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
+    return items
+
+
+def get_acme_authz_by_id(id: str):
+    for row in db.session.query(AcmeAuthz).all():
+        try:
+            #nkey = row.nkey.hex()
+            nkey = row.nkey.decode("utf-8", errors="ignore")
+            if nkey == id:
+                data = json.loads(row.nvalue)
+                account_data = get_acme_account_by_id(data["accountID"])
+                account = {
+                    "id": account_data["data"]["id"],
+                    "provisionerID": account_data["data"]["provisionerID"],
+                    "provisionerName": account_data["data"]["provisionerName"]
+                }
+                return {"nkey": nkey, "data": data, "account": account}
+        except Exception as e:
+            print("❌ Error parsing ACME authorization:", e)
+    return None
 
 
 def get_acme_challenges():
-    challenges = []
+    items = []
     for row in db.session.query(AcmeChallenge).all():
         try:
-            key = row.nkey.hex()
-            value = json.loads(row.nvalue)
-            challenges.append({"nkey": key, "data": value})
+            #nkey = row.nkey.hex()
+            nkey = row.nkey.decode("utf-8", errors="ignore")
+            data = json.loads(row.nvalue)
+            account_data = get_acme_account_by_id(data["accountID"])
+            account = {
+                "id": account_data["data"]["id"],
+                "provisionerID": account_data["data"]["provisionerID"],
+                "provisionerName": account_data["data"]["provisionerName"]
+            }
+            items.append({"nkey": nkey, "data": data, "account": account})
         except Exception as e:
-            print("Error parsing ACME challenge:", e)
-    return challenges
+            items.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
+    return items
 
 
-def get_acme_cert_by_id(cert_id: str):
-    for row in db.session.query(AcmeCert).all():
+def get_acme_challenge_by_id(id: str):
+    for row in db.session.query(AcmeChallenge).all():
         try:
-            key = row.nkey.hex()
-            value = json.loads(row.nvalue)
-            parsed_info = parse_cert(value["leaf"]) if "leaf" in value else {}
-            data = {**value, **parsed_info}
-            if data.get("id") == cert_id:
-                return {"nkey": key, "data": data}
+            #nkey = row.nkey.hex()
+            nkey = row.nkey.decode("utf-8", errors="ignore")
+            if nkey == id:
+                data = json.loads(row.nvalue)
+                account_data = get_acme_account_by_id(data["accountID"])
+                account = {
+                    "id": account_data["data"]["id"],
+                    "provisionerID": account_data["data"]["provisionerID"],
+                    "provisionerName": account_data["data"]["provisionerName"]
+                }
+                return {"nkey": nkey, "data": data, "account": account}
         except Exception as e:
-            print("❌ Error parsing ACME cert:", e)
+            print("❌ Error parsing ACME challenge:", e)
     return None
 
 
 def get_acme_account_orders_index():
-    index = []
+    items = []
     for row in db.session.query(AcmeAccountOrdersIndex).all():
         try:
-            key = row.nkey.hex()
-            value = json.loads(row.nvalue)
-            index.append({"nkey": key, "data": value})
+            #nkey = row.nkey.hex()
+            nkey = row.nkey.decode('utf-8', errors='ignore')
+            data = json.loads(row.nvalue)
+            items.append({"nkey": nkey, "data": data})
         except Exception as e:
-            print("Error parsing account orders index:", e)
-    return index
+            items.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
+    return items
 
 
 def get_acme_keyID_accountID_index():
-    index = []
+    items = []
     for row in db.session.query(AcmeKeyIdAccountIdIndex).all():
         try:
-            key = row.nkey.hex()
-            value = json.loads(row.nvalue)
-            index.append({"nkey": key, "data": value})
+            #nkey = row.nkey.hex()
+            nkey = row.nkey.decode('utf-8', errors='ignore')
+            data = json.loads(row.nvalue)
+            items.append({"nkey": nkey, "data": data})
         except Exception as e:
-            print("Error parsing keyID-accountID index:", e)
-    return index
+            items.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
+    return items
 
 
 def get_acme_serial_certs_index():
-    index = []
+    items = []
     for row in db.session.query(AcmeSerialCertsIndex).all():
         try:
-            key = row.nkey.hex()
-            value = json.loads(row.nvalue)
-            index.append({"nkey": key, "data": value})
+            #nkey = row.nkey.hex()
+            nkey = row.nkey.decode('utf-8', errors='ignore')
+            data = json.loads(row.nvalue)
+            items.append({"nkey": nkey, "data": data})
         except Exception as e:
-            print("Error parsing Serial Certs index:", e)
-    return index
+            items.append({"nkey": row.nkey.hex(), "data": {"error": str(e)}})
+    return items

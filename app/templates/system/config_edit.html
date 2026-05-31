@@ -12,30 +12,16 @@
 
 <div class="app-main">
 
-{% include 'includes/header.html' %}
-
-  <!-- Flash Message -->
-  <div class="app-content">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-      {{ message }}
-      <button type="button" class="close" data-bs-dismiss="alert">&times;</button>
-    </div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
-  </div>
-  <!-- Flash Message -->
-
+  {% include 'includes/header.html' %}
+  {% include 'includes/flash_message.html' %}
 
   <!-- Main content -->
   <section class="app-content">
     <div class="card">
+      <div class="card-header card-title">
+        Edit Configuration
+      </div>
       <div class="card-body">
-        <h2 class="mb-4">Edit Configuration</h2>
-
         <form method="POST">
           <div class="mb-3">
             <label for="db_host">Database Host</label>
@@ -98,7 +84,8 @@
             <input type="text" class="form-control" id="auth_backend" name="auth_backend" value="{{ auth_backend }}" required>
           </div>
 
-          <button type="submit" class="btn btn-primary">Save Changes</button>
+          <button type="submit" class="btn btn-primary" id="submit" name="submit">Save Changes</button>
+          <a href="/" id="cancel" name="cancel" class="btn btn-secondary">Cancel</a>
         </form>
       </div>
     </div>

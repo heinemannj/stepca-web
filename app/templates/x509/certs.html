@@ -12,31 +12,19 @@
 
 <div class="app-main">
 
-{% include 'includes/header.html' %}
+  {% include 'includes/header.html' %}
+  {% include 'includes/flash_message.html' %}
 
-  <!-- Content Wrapper -->
-  <div class="app-content">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-      {{ message }}
-      <button type="button" class="close" data-bs-dismiss="alert">&times;</button>
-    </div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
-  </div>
   <!-- Main content -->
   <section class="app-content">
     <div class="d-flex justify-content-end mb-3">
-      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newCertModal">
-        Submit CSR
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+        CSR
       </button>
     </div>
     <div class="card">
       <div class="card-body table-responsive p-0">
-        <table class="table table-hover text-sm table-striped">
+        <table class="table table-hover table-sm table-striped" style="font-size:10pt" id="app-table">
           <thead>
             <tr>
               <th>Serial Number</th>
@@ -45,120 +33,137 @@
               <th>Revoked</th>
               <th>Subject</th>
               <th>Issuer</th>
-              <th>Valid From</th>
-              <th>Valid To</th>
+              <th>Created</th>
+              <th>Expires</th>
               <th>DNS Names</th>
               <th>Provisioner</th>
-              <th style="width: 140px;">Actions</th>
+              <th style="width: 120px;">Actions</th>
             </tr>
           </thead>
           <tbody>
             {% for cert in certs %}
-            {% set validation = cert.validation %}
-            {% set data = cert.data %}
-            <tr>
-              <td><code>{{ data.serial_number or "—" }}</code></td>
-              <td>
-                {% if validation.status %}
-                <span class="badge badge-{{
-                      'success' if  validation.status == 'valid' else
-                      'warning' if  validation.status == 'revoked' else
-                      'danger' if  validation.status == 'expired' else 'secondary'
-                    }}">{{  validation.status or "unknown" }}</span>
-                {% else %}
-                <em>—</em>
-                {% endif %}
-              </td>
-              <td>
-                {% if validation.expired %}
-                <span class="badge badge-{{
-                      'light' if  validation.expired == 'true' else ''
-                    }}">{{  validation.expired or "unknown" }}</span>
-                {% else %}
-                <em>—</em>
-                {% endif %}
-              </td>
-              <td>
-                {% if validation.revoked %}
-                <span class="badge badge-{{
-                      'light' if  validation.revoked == 'true' else ''
-                    }}">{{  validation.revoked or "unknown" }}</span>
-                {% else %}
-                <em>—</em>
-                {% endif %}
-              </td>
-              <td>{{ data.subject_dn or "—" }}</td>
-              <td>{{ data.issuer or "—" }}</td>
-              <td>{{ data.validity.start or "—" }}</td>
-              <td>{{ data.validity.end or "—" }}</td>
-              <td>
-                {% if data.dns_names %}
-                {{ data.dns_names | join(", ") }}
-                {% else %}
-                <em>—</em>
-                {% endif %}
-              </td>
-              <td>{{ cert.provisioner.name or "—" }}</td>
-              <td>
-                <a href="#" class="btn btn-sm btn-info" onclick="loadX509Cert('{{ data.serial_number }}')" data-bs-toggle="modal"
-                  data-bs-target="#x509CertModal">
-                  <i class="fas fa-eye"></i>
-                </a>
-                <!-- <a href="/x509/revoke/{{cert.nkey }}" class="btn btn-sm btn-danger"
-                  onclick="return confirm('Are you sure you want to revoke this certificate ?')">
-                  <i class="fas fa-trash"></i>
-                  </a> -->
-
-                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#revokeModal"
-                  data-cert-id="{{ cert.nkey }}">
-                  <i class="fas fa-trash"></i>
-                </button>
-                {% if data.generated == True %}
-                <a href="{{ url_for('x509.download_cert', serial=data.serial) }}" class="btn btn-sm btn-success">
-                  <i class="fas fa-download"></i>
-                </a>
-                {% endif %}
-              </td>
-            </tr>
+              {% set validation = cert.validation %}
+              {% set data = cert.data %}
+              <tr>
+                <td><code>{{ data.serial_number or "—" }}</code></td>
+                <td>
+                  {% if validation.status %}
+                  <span class="badge text-bg-{{
+                        'success' if  validation.status == 'valid' else
+                        'warning' if  validation.status == 'revoked' else
+                        'danger' if  validation.status == 'expired' else 'secondary'
+                      }}">{{ validation.status or "unknown" }}</span>
+                  {% else %}
+                  <em>—</em>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if validation.expired %}
+                  <span class="badge text-bg-{{
+                        'light' if  validation.expired == 'true' else ''
+                      }}">{{ validation.expired or "unknown" }}</span>
+                  {% else %}
+                  <em>—</em>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if validation.revoked %}
+                  <span class="badge text-bg-{{
+                        'light' if  validation.revoked == 'true' else ''
+                      }}">{{ validation.revoked or "unknown" }}</span>
+                  {% else %}
+                  <em>—</em>
+                  {% endif %}
+                </td>
+                <td>{{ data.subject.common_name or "—" }}</td>
+                <td>{{ data.issuer.common_name or "—" }}</td>
+                <td>
+                  {% if data.validity.start %}
+                    <span class="badge text-bg-light"</span>
+                  {% else %}
+                    <span class="badge text-bg-warning"</span>
+                  {% endif %}
+                  {{ data.validity.start or "—" }}
+                </td>
+                <td>
+                  {% if validation.expired %}
+                    <span class="badge text-bg-danger"</span>
+                  {% else %}
+                    <span class="badge text-bg-success"</span>
+                  {% endif %}
+                  {{ data.validity.end or "—" }}
+                </td>
+                <td>
+                  {% if data.dns_names %}
+                    {% for i in data.dns_names %}
+                      {{ i }}<br>
+                    {% endfor %}
+                  {% else %}
+                    <em>—</em>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if cert.provisioner.name %}
+                    <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#provisionerViewModal"
+                      data-bs-provisionerID='{{ cert.provisioner.id | tojson | safe }}'
+                      style="--bs-btn-padding-y: 0; --bs-btn-padding-x: 0; font-size:10pt;">
+                      {{ cert.provisioner.name }}
+                    </button>
+                  {% else %}
+                    <em>—</em>
+                  {% endif %}
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#viewModal"
+                    data-bs-cert='{{ cert | tojson | safe }}'>
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#revokeModal"
+                    data-bs-cert='{{ cert | tojson | safe }}'>
+                    <i class="fas fa-trash"></i>
+                  </button>
+                  {% if data.generated == True %}
+                    <a href="{{ url_for('x509.download_cert', serial=data.serial) }}" class="btn btn-sm btn-success">
+                      <i class="fas fa-download"></i>
+                    </a>
+                  {% endif %}
+                </td>
+              </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- X.509 Certificate Modal -->
-    <div class="modal fade" id="x509CertModal" tabindex="-1" role="dialog" aria-labelledby="x509CertModalLabel"
-      aria-hidden="true">
+    <!-- View Modal -->
+    <div class="modal fade" id="viewModal" tabindex="-1" role="dialog" aria-labelledby="viewModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">X.509 Certificate</h5>
-            <button type="button" class="close" data-bs-dismiss="modal"><span>&times;</span></button>
+            <h5 class="modal-title">View - X.509 Certificate</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body text-sm" id="x509CertModalBody">
+          <div class="modal-body text-sm" id="viewModalBody">
             Loading...
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Revoke Certificate Modal -->
-    <div class="modal fade" id="revokeModal" tabindex="-1" role="dialog" aria-labelledby="revokeModalLabel"
-      aria-hidden="true">
+    <!-- Revoke Modal -->
+    <div class="modal fade" id="revokeModal" tabindex="-1" role="dialog" aria-labelledby="revokeModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
-        <form method="POST" action="{{ url_for('x509.revoke_cert') }}">
+        <form id="revokeForm" method="POST" action="{{ url_for('x509.revoke_cert') }}">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="revokeModalLabel">Revoke Certificate</h5>
-              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
+              <h5 class="modal-title" id="revokeModalLabel">Revoke - X.509 Certificate</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              <input type="hidden" name="cert_id" id="modal_cert_id">
+              <input type="hidden" name="cert_id" id="revokeFormCertId" readonly>
               <div class="mb-3">
                 <label for="passphrase">Provisioner Passphrase</label>
-                <input type="password" class="form-control" id="passphrase" name="passphrase" required>
+                <input type="password" name="passphrase" id="revokeFormPassphrase" class="form-control" required>
               </div>
             </div>
             <div class="modal-footer">
@@ -169,22 +174,21 @@
       </div>
     </div>
 
-    <!-- Certificate Signing Request Modal -->
-    <div class="modal fade" id="newCertModal" tabindex="-1" role="dialog" aria-labelledby="newCertModalLabel"
-      aria-hidden="true">
+    <!-- X.509 Certificate Signing Request Modal -->
+    <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <form method="POST" action="{{ url_for('x509.sign_cert') }}">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="newCertModalLabel">Submit Certificate Signing Request (CSR)</h5>
-              <button type="button" class="close" data-bs-dismiss="modal"><span>&times;</span></button>
+              <h5 class="modal-title" id="addModalLabel">Submit Certificate Signing Request (CSR)</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
               <div class="mb-3">
                 <label>Provisioner</label>
                 <select class="form-control" id="provisionerSelect" name="provisioner" required>
-                  {% for id, name in provisioners.items() %}
-                  <option value="{{ name }}">{{ name }}</option>
+                  {% for provisioner in provisioners %}
+                    <option value="{{ name }}">{{ provisioner.data.name }}</option>
                   {% endfor %}
                 </select>
                 <label for="passphrase">Provisioner Passphrase</label>
@@ -201,6 +205,21 @@
       </div>
     </div>
 
+    <!-- step-ca Provisioner View Modal -->
+    <div class="modal fade" id="provisionerViewModal" tabindex="-1" role="dialog" aria-labelledby="provisionerViewModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">View - step-ca Provisioner</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-sm" id="provisionerViewModalBody">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+
   </section>
   <!-- /.content -->
 </div>
@@ -210,43 +229,76 @@
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 
+<!-- script>
+  var table = new Tabulator("#app-table", {});
+</script -->
+
 <script>
 
-  $('#revokeModal').on('show.bs.modal', function (event) {
-    var button = $(event.relatedTarget) // Button that triggered the modal
-    var certId = button.data('cert-id') // Extract info from data-* attributes
-    var modal = $(this)
-    console.log("info" + certId)
-    modal.find('#modal_cert_id').val(certId)
-  })
+  const viewModal = document.querySelector('#viewModal');
+  viewModal.addEventListener('show.bs.modal', function (event) {
+    // Get the reference of the triggering button 
+    // and retrieve the value from the attribute
+    const modalButton = event.relatedTarget;
+    const cert = JSON.parse(modalButton.getAttribute('data-bs-cert'));
+    const jsonStr = JSON.stringify(cert, null, 4);
+
+    const modalBody = document.getElementById("viewModalBody");
+
+    modalBody.innerHTML = `
+      <p><strong>Serial Number:</strong> <code>${cert.data.serial_number}</code></p>
+      <p><strong>Subject:</strong> ${cert.data.subject_dn}</br>
+      <strong>Issuer:</strong> ${cert.data.issuer_dn}</p>
+      <p><strong>Status:</strong> ${cert.validation.status}</br>
+      <strong>Valid From:</strong> ${cert.data.validity.start}</br>
+      <strong>Valid To:</strong> ${cert.data.validity.end}</p>
+
+      <pre>${jsonStr}</pre>
+    `;
+  });
 
 
-  function loadX509Cert(certId) {
-    const modalBody = document.getElementById("x509CertModalBody");
-    modalBody.innerHTML = "<em>Loading...</em>";
+  const revokeModal = document.querySelector('#revokeModal');
+  revokeModal.addEventListener('show.bs.modal', function (event) {
+    // Get the reference of the triggering button 
+    // and retrieve the value from the attribute
+    const modalButton = event.relatedTarget;
+    const cert = JSON.parse(modalButton.getAttribute('data-bs-cert'));
 
-    fetch(`/api/x509/certs/${certId}`)
+    document.getElementById('revokeFormCertId').value = cert.nkey;
+  });
+
+
+  // Function for provisionerViewModal
+  const provisionerViewModal = document.querySelector('#provisionerViewModal');
+  provisionerViewModal.addEventListener('show.bs.modal', function (event) {
+    // Get the reference of the triggering button 
+    // and retrieve the value from the attribute
+    const modalButton = event.relatedTarget;
+    const provisioner = JSON.parse(modalButton.getAttribute('data-bs-provisionerID'));
+    const jsonStr = JSON.stringify(provisioner, null, 4);
+
+    const modalBody = document.getElementById("provisionerViewModalBody");
+
+    fetch(`/api/step/provisioners/${provisioner}`)
       .then(resp => resp.json())
-      .then(cert => {
-        if (cert.error) {
-          modalBody.innerHTML = `<div class="alert alert-danger">⚠️ ${cert.error} ${certId}</div>`;
+      .then(provisioner => {
+        if (provisioner.error) {
+          modalBody.innerHTML = `<div class="alert alert-danger">⚠️ ${provisioner.error}</div>`;
         } else {
-          jsonStr = JSON.stringify(cert, null, 4);
+          const jsonStr = JSON.stringify(provisioner, null, 4);
           modalBody.innerHTML = `
-          <p><strong>Serial Number:</strong> <code>${cert.data.serial_number}</code></p>
-          <p><strong>Subject:</strong> ${cert.data.subject_dn}</br>
-          <strong>Issuer:</strong> ${cert.data.issuer_dn}</p>
-          <p><strong>Status:</strong> ${cert.validation.status}</br>
-          <strong>Valid From:</strong> ${cert.data.validity.start}</br>
-          <strong>Valid To:</strong> ${cert.data.validity.end}</p>
-          <pre>${jsonStr}</pre>
-        `;
+            <p><strong>Provisioner ID:</strong> <code>${provisioner.data.id}</code></p>
+            <p><strong>Name:</strong> ${provisioner.data.name}</br>
+              <strong>Status:</strong> ${provisioner.status}</p>
+            <pre>${jsonStr}</pre>
+          `;
         }
       })
       .catch(() => {
-        modalBody.innerHTML = `<div class="alert alert-danger">⚠️ Failed to load certificate with Serial Number: ${certId}</div>`;
+        modalBody.innerHTML = `<div class="alert alert-danger">⚠️ Failed to load provisioner.</div>`;
       });
-  }
+  });
 
 </script>
 

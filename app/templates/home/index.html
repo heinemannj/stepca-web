@@ -12,7 +12,8 @@
 
 <div class="app-main">
 
-{% include 'includes/header.html' %}
+  {% include 'includes/header.html' %}
+  {% include 'includes/flash_message.html' %}
 
   <!-- Main content -->
   <section class="app-content">
@@ -20,94 +21,163 @@
       <!-- Small boxes (Stat box) -->
       <div class="row">
 
-
         <!-- ./col -->
         <div class="col-lg-3 col-6">
           <!-- small box -->
-          <div class="small-box bg-success">
+          <div class="small-box bg-success text-bg-primary">
             <div class="inner">
-              <h3>{{ active_certs }}</h3>
-
-              <p>Active Certificates</p>
+              <h3>{{ count.x509_certs.valid }} ({{ count.x509_certs.total }})</h3>
+              <p>Valid Certificates</p>
             </div>
-            <div class="icon">
-              <i class="ion ion-stats-bars"></i>
+            <div class="small-box-icon">
+              <i class="fa-brands fa-expeditedssl"></i>
             </div>
-            <a href="{{ url_for('x509.active_certs') }}" class="small-box-footer">More info <i
-                class="fas fa-arrow-circle-right"></i></a>
+            <a href="{{ url_for('x509.active_certs') }}"
+              class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+              More info
+              <i class="fas fa-arrow-circle-right"></i>
+            </a>
           </div>
         </div>
 
         <div class="col-lg-3 col-6">
           <!-- small box -->
-          <div class="small-box bg-info">
+          <div class="small-box bg-danger text-bg-primary">
             <div class="inner">
-              <h3>{{ acme_certs }}</h3>
-
-              <p>ACME Certificates</p>
+              <h3>{{ count.x509_certs.expired }} ({{ count.x509_certs.total }})</h3>
+              <p>Expired Certificates</p>
             </div>
-            <div class="icon">
-              <i class="ion ion-stats-bars"></i>
+            <div class="small-box-icon">
+              <i class="far fa-circle-xmark"></i>
             </div>
-            <a href="{{ url_for('acme.certs') }}" class="small-box-footer">More info <i
-                class="fas fa-arrow-circle-right"></i></a>
+            <a href="{{ url_for('x509.all_certs') }}"
+              class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+              More info
+              <i class="fas fa-arrow-circle-right"></i>
+            </a>
           </div>
         </div>
 
         <div class="col-lg-3 col-6">
           <!-- small box -->
-          <div class="small-box bg-danger">
+          <div class="small-box bg-danger text-bg-primary">
             <div class="inner">
-              <h3>{{ revoked_certs }}</h3>
-
+              <h3>{{ count.x509_certs.revoked }} ({{ count.x509_certs.total }})</h3>
               <p>Revoked Certificates</p>
             </div>
-            <div class="icon">
-              <i class="ion ion-bag"></i>
+            <div class="small-box-icon">
+              <i class="far fa-trash-can"></i>
             </div>
-            <a href="{{ url_for('x509.revoked_certs') }}" class="small-box-footer">More info <i
-                class="fas fa-arrow-circle-right"></i></a>
+            <a href="{{ url_for('x509.revoked_certs') }}"
+              class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+              More info
+              <i class="fas fa-arrow-circle-right"></i>
+            </a>
           </div>
         </div>
 
-
-
-        <!-- ./col -->
         <div class="col-lg-3 col-6">
           <!-- small box -->
-          <div class="small-box bg-warning">
+          <div class="small-box bg-warning text-bg-primary">
             <div class="inner">
-              <h3>{{ total_provisioners }}</h3>
-
-              <p>Provisioners</p>
+              <h3>{{ count.x509_certs.renewed }} ({{ count.x509_certs.all }})</h3>
+              <p>Renewed Certificates</p>
             </div>
-            <div class="icon">
-              <i class="ion ion-person-add"></i>
+            <div class="small-box-icon">
+              <i class="far fa-bell"></i>
             </div>
-            <a href="{{ url_for('step.provisioner') }}" class="small-box-footer">More info <i
-                class="fas fa-arrow-circle-right"></i></a>
+            <a href="{{ url_for('x509.all_certs') }}"
+              class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+              More info
+              <i class="fas fa-arrow-circle-right"></i>
+            </a>
           </div>
         </div>
 
+        <div class="col-lg-3 col-6">
+          <!-- small box -->
+          <div class="small-box bg-info text-bg-primary">
+            <div class="inner">
+              <h3>{{ count.acme_certs.valid }} ({{ count.acme_certs.total }})</h3>
+              <p>Valid ACME Certificates</p>
+            </div>
+            <div class="small-box-icon">
+              <i class="fa-brands fa-expeditedssl"></i>
+            </div>
+            <a href="{{ url_for('acme.certs') }}"
+              class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+              More info
+              <i class="fas fa-arrow-circle-right"></i>
+            </a>
+          </div>
+        </div>
 
+        <div class="col-lg-3 col-6">
+          <!-- small box -->
+          <div class="small-box bg-info text-bg-primary">
+            <div class="inner">
+              <h3>{{ count.acme_accounts.valid }} ({{ count.acme_accounts.total }})</h3>
+              <p>Valid ACME Accounts</p>
+            </div>
+            <div class="small-box-icon">
+              <i class="fas fa-user-shield"></i>
+            </div>
+            <a href="{{ url_for('acme.accounts') }}"
+              class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+              More info
+              <i class="fas fa-arrow-circle-right"></i>
+            </a>
+          </div>
+        </div>
 
+        <div class="col-lg-3 col-6">
+          <!-- small box -->
+          <div class="small-box bg-secondary text-bg-primary">
+            <div class="inner">
+              <h3>{{ count.provisioners.valid }} ({{ count.provisioners.total }})</h3>
+              <p>Valid Provisioners</p>
+            </div>
+            <div class="small-box-icon">
+              <i class="fas fa-user-shield"></i>
+            </div>
+            <a href="{{ url_for('step.provisioner') }}"
+              class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+              More info
+              <i class="fas fa-arrow-circle-right"></i>
+            </a>
+          </div>
+        </div>
 
-
+        <div class="col-lg-3 col-6">
+          <!-- small box -->
+          <div class="small-box bg-secondary text-bg-primary">
+            <div class="inner">
+              <h3>{{ count.admins.valid }} ({{ count.admins.total }})</h3>
+              <p>Valid Admins</p>
+            </div>
+            <div class="small-box-icon">
+              <i class="fas fas fa-user-graduate"></i>
+            </div>
+            <a href="{{ url_for('step.admins') }}"
+              class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+              More info
+              <i class="fas fa-arrow-circle-right"></i>
+            </a>
+          </div>
+        </div>
+        <!-- ./col -->
 
       </div>
-
       <!-- /.row (main row) -->
     </div><!-- /.container-fluid -->
   </section>
 
 
-
   <!-- Main content -->
   <section class="app-content">
     <div class="container-fluid">
+      <div class="row g-4 mb-4">
 
-
-      <div class="row">
         <div class="col-md-6">
           <!-- Bar chart -->
           <div class="card card-primary card-outline">
@@ -117,10 +187,11 @@
                 Certificate Issuance
               </h3>
               <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                  <i class="fas fa-minus"></i>
+                <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
+                  <i data-lte-icon="expand" class="fas fa-plus"></i>
+                  <i data-lte-icon="collapse" class="fas fa-minus"></i>
                 </button>
-                <button type="button" class="btn btn-tool" data-card-widget="remove">
+                <button type="button" class="btn btn-tool" data-lte-toggle="card-remove">
                   <i class="fas fa-times"></i>
                 </button>
               </div>
@@ -140,10 +211,11 @@
                 ACME Orders
               </h3>
               <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                  <i class="fas fa-minus"></i>
+                <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
+                  <i data-lte-icon="expand" class="fas fa-plus"></i>
+                  <i data-lte-icon="collapse" class="fas fa-minus"></i>
                 </button>
-                <button type="button" class="btn btn-tool" data-card-widget="remove">
+                <button type="button" class="btn btn-tool" data-lte-toggle="card-remove">
                   <i class="fas fa-times"></i>
                 </button>
               </div>
@@ -153,20 +225,22 @@
             </div>
           </div>
         </div>
+
       </div>
       <!-- /.row -->
     </div><!-- /.container-fluid -->
   </section>
-
-
   <!-- /.content -->
-
 </div>
 
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <!-- FLOT CHARTS -->
 <script src="https://cdn.jsdelivr.net/npm/jquery.flot@0.8.3/jquery.flot.min.js"></script>
 <!-- FLOT RESIZE PLUGIN - allows the chart to redraw when the window is resized -->
